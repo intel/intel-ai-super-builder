@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import "./AssistantLogo.css";
+import "./assistantLogo.css";
 import useDataStore from "../../stores/DataStore";
 
 const AssistantLogo = ({

@@ -53,17 +53,22 @@ const ChatMessage = ({ text, references = [], openFile, markdownRef }) => {
           components={{
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "");
-              return !inline && match ? (
-                <CodeBlock
-                  language={match[1]}
-                  value={String(children).replace(/\n$/, "")}
-                  {...props}
-                />
-              ) : (
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              );
+              if (!inline) {
+                const language = match ? match[1] : "javascript";
+                return (
+                  <CodeBlock
+                    language={language}
+                    value={String(children).replace(/\n$/, "")}
+                    {...props}
+                  />
+                );
+              } else {
+                return (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                );
+              }
             },
             img({ node, ...props }) {
               return (
