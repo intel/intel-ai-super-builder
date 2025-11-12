@@ -99,6 +99,9 @@ To get started with the UI source code, refer to the [UI development guide](src/
 
   [API Documentation - v1.2.0](https://intel.github.io/intel-ai-assistant-builder/v1.2.0)
 
+> [!NOTE]
+> The v2.0.0 API remains compatible with v2.1 and v2.2. We maintain API stability across minor releases to minimize disruption to your applications.
+
 <br>
 
 ## LLM Models and Recommendations
@@ -164,9 +167,22 @@ For comprehensive troubleshooting guidance, installation tips, and a complete li
 <br>
 
 ## What's New
-### Latest Release (Version 2.0.0)
+### Latest Release (Version 2.2.0)
+- MCP marketplace integration with Modelscope
+- Japanese language support
+- Wider support for MCP executables
+
+### Earlier Versions
+
+##### Version 2.1.0
+- Dark/Light mode sync with Windows Settings
+- Enhanced GPU device support
+- Knowledge Base compatibility fixes
+
+##### Version 2.0.0
+
 - Introducing MCP Support
-We’ve added Model Control Protocol (MCP) support, enabling seamless import/export of MCP servers and agents, improved error handling, and enhanced UI/UX for managing workflows. This lays the foundation for more flexible agent-based orchestration and integration with external systems.
+We've added Model Control Protocol (MCP) support, enabling seamless import/export of MCP servers and agents, improved error handling, and enhanced UI/UX for managing workflows. This lays the foundation for more flexible agent-based orchestration and integration with external systems.
 
 - Introducing New OVMS Backend
 A new OpenVINO Model Server (OVMS) backend has been integrated into the system. This provides better scalability, cache handling for NPU/GPU models, and improved process management. It ensures more efficient model loading and execution, especially for large-scale workloads.
@@ -183,8 +199,6 @@ Overflow token and stop-chat handling fixes have been added to address out-of-me
 
 - Bug Fixes
 This release addresses a wide range of issues, including CSV encoding errors, security vulnerabilities and regressions caused by dependency upgrades. These fixes collectively improve reliability and user experience across the platform.
-
-### Earlier Versions
 
 ##### Version 1.2.2
 - Enhanced Hardware Verification: We've refined our hardware check feature to ensure compatibility avoiding issues with the latest CPU models.
