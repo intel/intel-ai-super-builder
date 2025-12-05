@@ -99,6 +99,105 @@ finally
     Console.WriteLine($"Full response: {fullResponse}");
 }
 
+
+//Chat with RAG
+Console.WriteLine("\n\n-------- Chat with RAG (Attached Files) -------");
+
+// Step 1: Upload file to knowledge base first, you can also add files by our APP UI.
+// Skip this step if the file has already been added to knowledge base!
+var readmePath = @"C:\Users\labuser\Desktop\intel_aia\README.md"; //update this path with the file you want to upload
+Console.WriteLine($"Uploading README file: {readmePath}");
+
+// Verify file exists before uploading
+if (!File.Exists(readmePath))
+{
+    Console.WriteLine($"ERROR: File does not exist at: {readmePath}");
+    Console.WriteLine($"Current directory: {Directory.GetCurrentDirectory()}");
+    Console.WriteLine($"Base directory: {AppContext.BaseDirectory}");
+}
+else
+{
+    Console.WriteLine($"File verified: {readmePath}");
+
+    var addFilesRequest = new AddFilesRequest
+    {
+        FilesToUpload = $"[\"{readmePath.Replace("\\", "\\\\")}\"]"
+    };
+
+    try
+    {
+        Console.WriteLine("Starting file upload...");
+        var uploadStream = client.AddFiles(addFilesRequest);
+        await foreach (var uploadResponse in uploadStream.ResponseStream.ReadAllAsync())
+        {
+            if (!string.IsNullOrEmpty(uploadResponse.CurrentFileUploading))
+            {
+                Console.WriteLine($"Uploading: {uploadResponse.CurrentFileUploading} - {uploadResponse.CurrentFileProgress}%");
+            }
+            if (!string.IsNullOrEmpty(uploadResponse.FilesUploaded))
+            {
+                Console.WriteLine($"Files uploaded: {uploadResponse.FilesUploaded}");
+            }
+        }
+        Console.WriteLine("File upload complete!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Upload error: {ex.Message}");
+    }
+
+    // Step 2: Chat with the uploaded file
+    var ragChatRequest = new ChatRequest
+    {
+        Name = "SuperBuilder C# Client!",
+        Prompt = "What is superbuilder?",
+        AttachedFiles = $"[\"{readmePath.Replace("\\", "\\\\")}\"]" // Query the uploaded file
+    };
+
+    var ragFullResponse = "";
+    try
+    {
+        var r = client.Chat(ragChatRequest);
+        await foreach (var response in r.ResponseStream.ReadAllAsync())
+        {
+            Console.WriteLine("Response chunk: " + response.Message);
+            ragFullResponse += response.Message;
+        
+            // Print references if available
+            if (response.References.Count > 0)
+            {
+                Console.WriteLine("\nReferences:");
+                foreach (var reference in response.References)
+                {
+                    Console.WriteLine($"  - File: {reference.File}");
+                    if (reference.HasPage)
+                    {
+                        Console.WriteLine($"    Page: {reference.Page}");
+                    }
+                    if (!string.IsNullOrEmpty(reference.Sheet))
+                    {
+                        Console.WriteLine($"    Sheet: {reference.Sheet}");
+                    }
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Unexpected error: {ex.Message}");
+        Console.WriteLine($"Sending stop generation now...");
+        var stopRequest = new StopChatRequest { };
+        var stopResponse = client.StopChat(stopRequest);
+        Console.WriteLine($"Generation stopped");
+    }
+    finally
+    {
+        Console.WriteLine($"\nFull RAG response: {ragFullResponse}");
+    }
+}
+
+
+
 Console.WriteLine("\n\n-------- Get All MCP Servers -------");
 var getRequest = new GetMCPServersRequest();
 
