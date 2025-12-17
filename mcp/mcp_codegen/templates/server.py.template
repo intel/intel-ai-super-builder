@@ -151,14 +151,15 @@ def start_server(port=None, protocol=None):
 
         _server_thread = threading.Thread(target=_run_server_in_thread, args=(port, protocol), daemon=True)
         _server_thread.start()
-        
+        _server_start_time = time.time()
+
+        # Wait for server to start; otherwise, _server_running might be in an incorrect state.
+        time.sleep(2)
+
         # Start shutdown listener in a separate daemon thread (only for non-stdio protocols)
         if protocol != 'stdio' and port is not None:
-            threading.Thread(target=shutdown_listener, args=(port,), daemon=True).start()
-        
-        _server_start_time = time.time()
-        
-        time.sleep(2)  # Wait for server to start
+            threading.Thread(target=shutdown_listener, args=(port, protocol), daemon=True).start()
+
         if _server_running:
             if protocol == 'stdio':
                 print(format_message('server_started'))
@@ -172,18 +173,22 @@ def start_server(port=None, protocol=None):
         print(format_message('start_error', error=str(e)))
         return False
 
-def stop_server(json_mode=False, port=None):
+def stop_server(json_mode=False, port=None, protocol=None):
     """Stop the MCP server using multiple reliable methods."""
     global _server_thread, _server_loop, _server_running
 
     # Use provided port or fall back to global default
     if port is None:
         port = {server_name}_PORT
-    
+
+    # Use provided protocol or fall back to global default
+    if protocol is None:
+        protocol = {server_name}_PROTOCOL
+
     # For stdio protocol, port is None
-    if {server_name}_PROTOCOL == 'stdio':
+    if protocol == 'stdio':
         port = None
-    
+
     # First try to stop server started by this process
     if _server_running:
         try:
@@ -335,13 +340,19 @@ def stop_server(json_mode=False, port=None):
                 print(format_message('stop_fail'))
             return False
 
-def is_server_running():
+def is_server_running(port=None, protocol=None):
     """Check if the server is currently running."""
+    # Use provided parameters or fall back to global defaults
+    if port is None:
+        port = {server_name}_PORT
+    if protocol is None:
+        protocol = {server_name}_PROTOCOL
+
     # For stdio protocol, only check the internal flag since there's no port
-    if {server_name}_PROTOCOL == 'stdio':
+    if protocol == 'stdio':
         return _server_running
     # For other protocols, check both internal flag and port usage for more accurate status
-    return _server_running and is_port_in_use({server_name}_PORT)
+    return _server_running and is_port_in_use(port)
 
 def is_port_in_use(port):
     """Check if a port is currently in use."""
@@ -353,7 +364,7 @@ def is_port_in_use(port):
     except Exception:
         return False
 
-def shutdown_listener(port):
+def shutdown_listener(port, protocol):
     """Listen for a shutdown command on a local TCP socket."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -362,14 +373,16 @@ def shutdown_listener(port):
         sock.bind(('127.0.0.1', port + 1))  # Use port + 1 for control
         sock.listen(1)
         sock.settimeout(1)  # Add timeout to make it responsive
-        
+
         while _server_running:
             try:
                 conn, addr = sock.accept()
                 data = conn.recv(1024)
                 if data == b'SHUTDOWN':
                     print("Shutdown command received via control socket")
-                    stop_server(json_mode=False, port=port)  # Pass the port parameter
+                    stop_server(
+                        json_mode=False, port=port, protocol=protocol
+                    )  # Pass the port parameter
                     conn.sendall(b'OK')
                     conn.close()
                     break
@@ -482,7 +495,11 @@ Examples:
                         time.sleep(1)
                 except KeyboardInterrupt:
                     print("\\nReceived interrupt signal")
-                    stop_server(json_mode=args.json, port=current_port)
+                    stop_server(
+                        json_mode=args.json,
+                        port=current_port,
+                        protocol=current_protocol,
+                    )
                     response, exit_code = create_response(
                         True, 
                         format_message('interrupt'),
@@ -499,7 +516,9 @@ Examples:
                 )
                 
         elif args.command == "stop":
-            success = stop_server(json_mode=args.json, port=current_port)
+            success = stop_server(
+                json_mode=args.json, port=current_port, protocol=current_protocol
+            )
             response, exit_code = create_response(
                 success,
                 format_message('stop_success' if success else 'stop_fail'),
