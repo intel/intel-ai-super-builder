@@ -1,0 +1,26 @@
+# Build artifacts
+bundled/
+markmap-standalone.exe
+dist/
+*.exe
+
+# Node modules and lock files
+node_modules/
+package-lock.json
+
+# Python virtual environment and cache
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Test files
+test_*.md
+test_*.html
+test_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

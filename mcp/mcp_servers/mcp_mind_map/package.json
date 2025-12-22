@@ -1,0 +1,21 @@
+{
+  "name": "markmap-standalone",
+  "version": "1.0.0",
+  "description": "Standalone markmap executable",
+  "main": "markmap-wrapper.js",
+  "type": "commonjs",
+  "bin": {
+    "markmap-standalone": "./markmap-wrapper.js"
+  },
+  "dependencies": {
+    "markmap-cli": "^0.18.12"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2",
+    "pkg": "^5.8.1"
+  },
+  "scripts": {
+    "bundle": "node create-bundle.js",
+    "build": "npm run bundle && pkg markmap-wrapper.js --targets node18-win-x64 --output markmap-standalone.exe --compress GZip --config pkg-package.json"
+  }
+}

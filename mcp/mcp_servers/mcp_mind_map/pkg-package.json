@@ -1,0 +1,23 @@
+{
+  "name": "markmap-standalone",
+  "version": "1.0.0",
+  "description": "Standalone markmap executable",
+  "main": "markmap-wrapper.js",
+  "type": "commonjs",
+  "bin": {
+    "markmap-standalone": "./markmap-wrapper.js"
+  },
+  "pkg": {
+    "assets": [
+      "bundled/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist",
+    "scripts": [
+      "markmap-wrapper.js",
+      "bundled/**/*.js"
+    ]
+  }
+}
