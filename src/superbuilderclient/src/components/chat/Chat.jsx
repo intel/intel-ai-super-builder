@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import "./Chat.css";
 import AssistantLogo from "../assistantLogo/assistantLogo";
 import FeedbackRow from "../feedback/Feedback";
@@ -8,6 +8,8 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism"; // Choose any style
 import StopCircleOutlinedIcon from "@mui/icons-material/StopCircleOutlined";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { ChatContext } from "../context/ChatContext";
 import { invoke } from "@tauri-apps/api/core";
 import { IconButton, Typography, Link } from "@mui/material";
@@ -24,7 +26,56 @@ const CodeBlock = ({ language, value }) => {
   );
 };
 
-const ChatMessage = ({ text, references = [], openFile, markdownRef }) => {
+const ThinkingBlock = React.memo(({ thinking, thinkingComplete = false, isExpanded, onToggle }) => {
+  const { t } = useTranslation();
+
+  if (!thinking || thinking.trim() === "") {
+    return null;
+  }
+
+  const label = thinkingComplete ? t("chat.thought") : t("chat.thinking");
+
+  return (
+    <div className="thinking-container">
+      <div className="thinking-header" onClick={onToggle}>
+        <div className="thinking-title">
+          <span className="thinking-icon">💭</span>
+          <span className="thinking-label">
+            {label}
+            {!thinkingComplete && (
+              <span className="thinking-dots">
+                <span className="dot-1">.</span>
+                <span className="dot-2">.</span>
+                <span className="dot-3">.</span>
+              </span>
+            )}
+          </span>
+        </div>
+        <IconButton
+          size="small"
+          className="thinking-toggle"
+        >
+          {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
+      </div>
+      {isExpanded && (
+        <div className="thinking-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {thinking}
+          </ReactMarkdown>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const ChatMessage = ({ text, references = [], openFile, markdownRef, thinking, thinkingComplete }) => {
+  const [isThinkingExpanded, setIsThinkingExpanded] = useState(false);
+  
+  const handleToggleThinking = React.useCallback(() => {
+    setIsThinkingExpanded(prev => !prev);
+  }, []);
+  
   const getFileLink = (reference) => {
     return `${reference.file}`;
   };
@@ -45,8 +96,14 @@ const ChatMessage = ({ text, references = [], openFile, markdownRef }) => {
   const processedText = text.replace(/\\n/g, "\n").replace(/\n/g, "  \n");
 
   return (
-    <div className="chat-message">
-      <span ref={markdownRef}>
+    <div className="chat-message" data-testid="chat-message-container">
+      <ThinkingBlock 
+        thinking={thinking} 
+        thinkingComplete={thinkingComplete}
+        isExpanded={isThinkingExpanded}
+        onToggle={handleToggleThinking}
+      />
+      <span ref={markdownRef} data-testid="chat-response-markdown">
         <ReactMarkdown
           children={processedText}
           remarkPlugins={[remarkGfm]}
@@ -118,6 +175,7 @@ const ChatMessage = ({ text, references = [], openFile, markdownRef }) => {
                   underline="hover"
                   onClick={() => openFile(getFileLink(reference))}
                   sx={{fontSize: "14px"}}
+                  data-testid={`chat-reference-file-link-${index}`}
                 >
                   {getFileName(reference.file, reference.page, reference.sheet)}
                 </Link>
@@ -126,6 +184,60 @@ const ChatMessage = ({ text, references = [], openFile, markdownRef }) => {
           </ul>
         </div>
       )}
+    </div>
+  );
+};
+
+const ChatBlock = ({ message, index, messages, isWaitingForFirstToken, handleResubmit, enableFeedback, enableEmail, handleOpenFileLocation, t }) => {
+  const markdownRef = useRef(null);
+  return (
+    <div>
+      <div className={`message ${message.sender}`}>
+        <div className="sender-logo">
+          {message.sender !== "user" ? (
+            <AssistantLogo />
+          ) : (
+            <div className={`sender-logo ${message.sender}`} />
+          )}
+        </div>
+        <div className={`message-text ${message.sender}`}>
+          {message.sender === "assistant" ? (
+            <ChatMessage
+              text={message.text}
+              references={message.references}
+              openFile={handleOpenFileLocation}
+              markdownRef={markdownRef}
+              thinking={message.thinking}
+              thinkingComplete={message.thinkingComplete}
+            />
+          ) : (
+            message.text
+          )}
+          {message.sender !== "user" &&
+            index === messages.length - 1 &&
+            isWaitingForFirstToken && (
+              <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>{t("chat.processing")}</p>
+              </div>
+            )}
+        </div>
+      </div>
+      <div>
+        {index !== 0 && message.sender !== "user" ? (
+          <FeedbackRow
+            question={messages[index - 1].text}
+            message={message.text}
+            messageIndex={index}
+            resubmitQuestion={handleResubmit}
+            enableSendFeedback={enableFeedback}
+            enableEmail={enableEmail}
+            markdownRef={markdownRef}
+          />
+        ) : (
+          <div />
+        )}
+      </div>
     </div>
   );
 };
@@ -139,10 +251,11 @@ const Chat = ({
   onMessageSend = () => {},
   onResubmitSend = () => {},
   enableFeedback = false,
-  enableEmail = true,
+  enableEmail = true
 }) => {
   const { messages, sendMessage, isWaitingForFirstToken, isChatReady } =
     useContext(ChatContext);
+
   const { t } = useTranslation();
   const { assistant } = useDataStore();
 
@@ -182,66 +295,23 @@ const Chat = ({
     onMessageSend();
   };
 
-  // Includes question and response with feedback row
-  const ChatBlock = ({ message, index }) => {
-    const markdownRef = useRef(null);
-    return (
-      <div key={message.id}>
-        <div className={`message ${message.sender}`}>
-          <div className="sender-logo">
-            {message.sender !== "user" ? (
-              <AssistantLogo />
-            ) : (
-              <div className={`sender-logo ${message.sender}`} />
-            )}
-          </div>
-          <div className={`message-text ${message.sender}`}>
-            {message.sender === "assistant" ? (
-              <ChatMessage
-                key={message.id}
-                text={message.text}
-                references={message.references}
-                openFile={handleOpenFileLocation}
-                markdownRef={markdownRef}
-              />
-            ) : (
-              message.text
-            )}
-            {message.sender !== "user" &&
-              index === messages.length - 1 &&
-              isWaitingForFirstToken && (
-                <div className="loading-container">
-                  <div className="loading-spinner"></div>
-                  <p>{t("chat.processing")}</p>
-                </div>
-              )}
-          </div>
-        </div>
-        <div>
-          {index !== 0 && message.sender !== "user" ? (
-            <FeedbackRow
-              question={messages[index - 1].text}
-              message={message.text}
-              messageIndex={index}
-              resubmitQuestion={handleResubmit}
-              enableSendFeedback={enableFeedback}
-              enableEmail={enableEmail}
-              markdownRef={markdownRef}
-            />
-          ) : (
-            <div />
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className={className}>
+    <div className={className} data-testid="chat-container">
       {/* Messages area */}
       <div className="messages-container">
         {messages.map((message, index) => (
-          <ChatBlock key={index} message={message} index={index} />
+          <ChatBlock 
+            key={message.id}
+            message={message} 
+            index={index}
+            messages={messages}
+            isWaitingForFirstToken={isWaitingForFirstToken}
+            handleResubmit={handleResubmit}
+            enableFeedback={enableFeedback}
+            enableEmail={enableEmail}
+            handleOpenFileLocation={handleOpenFileLocation}
+            t={t}
+          />
         ))}
         <div ref={endRef} />
       </div>

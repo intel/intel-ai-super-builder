@@ -21,7 +21,7 @@ const CommitIdNotification = () => {
   }
 
   return (
-    <Alert severity="warning" sx={{ mb: 2 }}>
+    <Alert severity="warning" sx={{ mb: 2 }} data-testid="commit-id-orphaned-models-warning">
       <AlertTitle>
         {t("model_incompatible.header_model_updates_required")}
       </AlertTitle>

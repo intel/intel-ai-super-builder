@@ -25,7 +25,7 @@ export default function FileTable({
   rows,
   enableRemoveButton,
   disableRemoveButton,
-  onSelectionChange,
+  onSelectionChange
 }) {
   const { fileStatus, filesLoaded } = useContext(FileManagementContext);
   const gridRef = useRef(null);
@@ -111,6 +111,7 @@ export default function FileTable({
       width: gridWidth * 0.3,
       renderCell: (params) => (
         <a
+          data-testid={`file-link-${params.row.id}`}
           onClick={() =>
             handleOpenFileLocation(params.row.path + params.row.name)
           }
@@ -158,6 +159,7 @@ export default function FileTable({
       <Box sx={{ width: "100%" }} ref={gridRef}>
         <Paper sx={{ height: "100%", width: "100%", overflow: "auto" }}>
           <DataGrid
+            data-testid="file-table-grid"
             rows={rows}
             columns={columns}
             initialState={{

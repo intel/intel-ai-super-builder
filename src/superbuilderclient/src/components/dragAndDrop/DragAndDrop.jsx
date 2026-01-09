@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef, use } from "react";
+import React, { useEffect, useState, useRef, use } from "react";
 import { listen } from "@tauri-apps/api/event";
 import "./DragAndDrop.css";
 import FileManagement from "../fileManagement/FileManagement";
@@ -111,7 +111,7 @@ const DragAndDrop = () => {
   }
   return (
     <div className="drag-n-drop-container">
-      <div onClick={toggleDragAndDropVisibility} className="instructions">
+      <div onClick={toggleDragAndDropVisibility} className="instructions" data-testid="dragdrop-toggle-button">
         <div
           className={`dragAndDropVisibility ${isDragAndDropVisible ? "" : "rotated"
             }`}
@@ -173,6 +173,7 @@ const DragAndDrop = () => {
                 className="cancel-upload"
                 onClick={handleCancelButtonClick}
                 startIcon={<CancelIcon />}
+                data-testid="dragdrop-cancel-upload-button"
               >
                 Cancel
               </Button>
@@ -184,6 +185,7 @@ const DragAndDrop = () => {
                   onClick={handleFileButtonClick}
                   startIcon={<AddCircleIcon />}
                   disabled={!isChatReady}
+                  data-testid="dragdrop-add-files-button"
                 >
                   {t('draganddrop.button.fiels')}
                 </Button>
@@ -193,6 +195,7 @@ const DragAndDrop = () => {
                   onClick={handleFolderButtonClick}
                   startIcon={<AddCircleIcon />}
                   disabled={!isChatReady}
+                  data-testid="dragdrop-add-folders-button"
                 >
                   {t('draganddrop.button.folders')}
                 </Button>
@@ -207,7 +210,8 @@ const DragAndDrop = () => {
               variant="contained"
               onClick={openLibrary}
               startIcon={<EditNoteIcon />}
-              disabled={!isChatReady}>
+              disabled={!isChatReady}
+              data-testid="dragdrop-manage-files-button">
               <span>{t('draganddrop.button.manage')}</span>
             </Button>
             <FileManagement

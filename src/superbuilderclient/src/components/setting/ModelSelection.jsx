@@ -126,6 +126,7 @@ const ModelSelection = () => {
         </Typography>
         <FormControl fullWidth size="small">
           <Select
+            data-testid="chat-model-select"
             value={config.ActiveAssistant.models.chat_model}
             renderValue={(value) => value}
             onChange={(event) => {
@@ -149,6 +150,7 @@ const ModelSelection = () => {
                   maxHeight: 48 * 4.5 + 8,
                   overflowY: "auto",
                 },
+                'data-testid': 'model-select-menu-paper',
               },
             }}
             sx={{ width: "100%", fontSize: "14px" }}
@@ -166,6 +168,7 @@ const ModelSelection = () => {
               <MenuItem
                 key={index}
                 value={model.model}
+                data-testid={`chat-model-option-${model.model}`}
                 sx={{
                   justifyContent: "space-between",
                   fontSize: "14px",
@@ -179,6 +182,7 @@ const ModelSelection = () => {
                 {config.ActiveAssistant.models.chat_model !== model.model &&
                   (downloadedModels[model.model] === true ? (
                     <DeleteIcon
+                      data-testid="delete-recommended-model-icon"
                       fontSize="small"
                       onClick={(event) => {
                         event.stopPropagation();
@@ -217,6 +221,7 @@ const ModelSelection = () => {
                 <MenuItem
                   key={index}
                   value={model.full_name}
+                  data-testid={`chat-model-option-${model.full_name}`}
                   sx={{
                     justifyContent: "space-between",
                     fontSize: "14px",
@@ -232,6 +237,7 @@ const ModelSelection = () => {
                     model.full_name &&
                     (downloadedModels[model.full_name] === true ? (
                       <DeleteIcon
+                        data-testid="delete-other-model-icon"
                         fontSize="small"
                         onClick={(event) => {
                           event.stopPropagation();
@@ -270,6 +276,7 @@ const ModelSelection = () => {
         </Typography>
         <FormControl fullWidth size="small">
           <Select
+            data-testid="embedding-model-select"
             value={config.ActiveAssistant.models.embedding_model}
             renderValue={(value) => value}
             onChange={(event) => {
@@ -330,6 +337,7 @@ const ModelSelection = () => {
         </Typography>
         <FormControl fullWidth size="small">
           <Select
+            data-testid="ranker-model-select"
             value={config.ActiveAssistant.models.ranker_model}
             renderValue={(value) => value}
             onChange={(event) => {
@@ -390,6 +398,7 @@ const ModelSelection = () => {
         </Typography>
         <FormControl fullWidth size="small">
           <Select
+            data-testid="download-endpoint-select"
             value={config.download_endpoint}
             renderValue={(value) => value}
             onChange={(event) => {
@@ -434,7 +443,7 @@ const ModelSelection = () => {
         </FormControl>
       </Box>
 
-      <Dialog open={removeModelDialog} onClose={closeRemoveModelDialog}>
+      <Dialog open={removeModelDialog} onClose={closeRemoveModelDialog} data-testid="remove-model-dialog" >
         <DialogTitle>{t("setting.models.deletion.title")}</DialogTitle>
         <DialogContent>
           {t("setting.models.deletion.description")} {removeModelName}.
@@ -442,10 +451,11 @@ const ModelSelection = () => {
           {t("setting.models.deletion.description_2")}
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeRemoveModelDialog}>
+          <Button onClick={closeRemoveModelDialog} data-testid="cancel-remove-model-button">
             {t("setting.models.deletion.button.cancel")}
           </Button>
           <Button
+            data-testid="confirm-remove-model-button"
             onClick={() => modelRemove()}
             variant="contained"
             color="error"

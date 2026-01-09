@@ -1,5 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+#[cfg(feature = "mock-backend")]
+mod mock;
+
 mod grpc_client;
 use grpc_client::{ SharedClient, super_builder };
 use grpc_client::{
@@ -85,45 +89,57 @@ async fn get_missing_models(
     models_abs_path: String,
     models: Vec<String>
 ) -> Result<MissingModelsResponse, String> {
-    // Get the current executable path
-
-    // Ensure the models directory exists
-    let models_dir_path = Path::new(&models_abs_path);
-
-    if !models_dir_path.exists() {
-        println!("Models directory does not exist, creating...");
-        fs::create_dir_all(&models_dir_path).map_err(|e| e.to_string())?;
-    } else {
-        println!("Models directory already exists.");
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: get_missing_models - returning empty missing models list");
+        return Ok(MissingModelsResponse {
+            missing_models: Vec::new(),
+            models_dir_path: models_abs_path,
+        });
     }
 
-    // List the files in the models directory
-    let mut files_in_directory = Vec::new();
-    if let Ok(entries) = fs::read_dir(&models_dir_path) {
-        for entry in entries.flatten() {
-            if let Ok(file_name) = entry.file_name().into_string() {
-                files_in_directory.push(file_name);
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        // Get the current executable path
+
+        // Ensure the models directory exists
+        let models_dir_path = Path::new(&models_abs_path);
+
+        if !models_dir_path.exists() {
+            println!("Models directory does not exist, creating...");
+            fs::create_dir_all(&models_dir_path).map_err(|e| e.to_string())?;
+        } else {
+            println!("Models directory already exists.");
+        }
+
+        // List the files in the models directory
+        let mut files_in_directory = Vec::new();
+        if let Ok(entries) = fs::read_dir(&models_dir_path) {
+            for entry in entries.flatten() {
+                if let Ok(file_name) = entry.file_name().into_string() {
+                    files_in_directory.push(file_name);
+                }
             }
         }
+        
+        #[cfg(debug_assertions)]
+        println!("Files in directory: {:?}", files_in_directory);
+
+        // Determine which models are missing
+        let missing_models = models
+            .into_iter()
+            .filter(|model| !files_in_directory.contains(model))
+            .collect::<Vec<_>>();
+
+        println!("Missing models: {:?}", missing_models);
+
+        let response = MissingModelsResponse {
+            missing_models,
+            models_dir_path: format!("{}", models_dir_path.display()),
+        };
+
+        Ok(response)
     }
-    
-    #[cfg(debug_assertions)]
-    println!("Files in directory: {:?}", files_in_directory);
-
-    // Determine which models are missing
-    let missing_models = models
-        .into_iter()
-        .filter(|model| !files_in_directory.contains(model))
-        .collect::<Vec<_>>();
-
-    println!("Missing models: {:?}", missing_models);
-
-    let response = MissingModelsResponse {
-        missing_models,
-        models_dir_path: format!("{}", models_dir_path.display()),
-    };
-
-    Ok(response)
 }
 
 #[tauri::command]
@@ -140,16 +156,16 @@ fn check_openvino_model(folder_path: String) -> bool {
     file1_path.exists() && file2_path.exists()
 }
 
+#[cfg(target_os = "windows")]
 fn set_window_borders(window: tauri::WebviewWindow) -> Result<(), String> {
-    match window.hwnd() {
-        #[cfg(target_os = "windows")]
-        Ok(hwnd) => {
-            use windows::Win32::{
-                Graphics::Dwm::DwmExtendFrameIntoClientArea,
-                UI::Controls::MARGINS,
-                Foundation::HWND,
-            };
+    use windows::Win32::{
+        Graphics::Dwm::DwmExtendFrameIntoClientArea,
+        UI::Controls::MARGINS,
+        Foundation::HWND,
+    };
 
+    match window.hwnd() {
+        Ok(hwnd) => {
             let margins = MARGINS {
                 cxLeftWidth: 1,
                 cxRightWidth: 1,
@@ -163,8 +179,13 @@ fn set_window_borders(window: tauri::WebviewWindow) -> Result<(), String> {
                 )
             }
         }
-        _ => Err("Unsupported platform".to_string()),
+        Err(_) => Err("Failed to get window handle".to_string()),
     }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn set_window_borders(_window: tauri::WebviewWindow) -> Result<(), String> {
+    Err("Window border customization is only supported on Windows".to_string())
 }
 
 #[tauri::command]
@@ -239,7 +260,7 @@ async fn fetch_modelscope_mcp_servers(
         .put(url)
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
-        .header("User-Agent", "IntelAIA/2.2.0")
+        .header("User-Agent", "IntelAIA/2.7.0")
         .json(&request_body)
         .send()
         .await
@@ -286,7 +307,7 @@ async fn fetch_modelscope_mcp_by_id(
         .get(url)
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
-        .header("User-Agent", "IntelAIA/2.2.0")
+        .header("User-Agent", "IntelAIA/2.7.0")
         .send()
         .await
         .map_err(|e| format!("Request failed: {}", e))?;
@@ -387,7 +408,8 @@ pub async fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
-            set_window_borders(window).unwrap();
+            // Only set window borders on Windows - ignore errors on other platforms
+            let _ = set_window_borders(window);
             Ok(())
         })
         .manage(client)

@@ -1,4 +1,4 @@
-﻿import NotificationContent from "./NotificationContent";
+import NotificationContent from "./NotificationContent";
 import React, { useEffect, useState, useContext } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { compareVersions } from "compare-versions";
@@ -151,6 +151,7 @@ const Notification = ({ isOpen, toggleOpen, assistant }) => {
               size="m"
               variant="text"
               onClick={toggleOpen}
+              data-testid="notification-close-button"
             >
               {t('notification.close_button')}
             </Button>
@@ -160,6 +161,7 @@ const Notification = ({ isOpen, toggleOpen, assistant }) => {
               <Button
                 size="m"
                 variant="contained"
+                data-testid="notification-portal-button"
               >
                 {t('notification.portal_button')}
               </Button>
@@ -171,7 +173,7 @@ const Notification = ({ isOpen, toggleOpen, assistant }) => {
   }
 
   return (
-    <FluidModal open={isOpen} handleClose={toggleOpen} header={t('notification.header')} assistant={assistant} footer={footerContent}>
+    <FluidModal open={isOpen} handleClose={toggleOpen} header={t('notification.header')} assistant={assistant} footer={footerContent} data-testid="notification-modal">
       <NotificationContent
         version={data.version}
         date={data.date}

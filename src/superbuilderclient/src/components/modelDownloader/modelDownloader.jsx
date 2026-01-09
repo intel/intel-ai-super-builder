@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./modelDownloader.css";
 import DownloadBody from "./DownloadBody";
 import { invoke } from "@tauri-apps/api/core";
@@ -192,6 +192,7 @@ const ModelDownloader = () => {
             <div
               className="downloader-container modal-content"
               onClick={(e) => e.stopPropagation()}
+              data-testid="model-downloader-modal"
             >
               <DownloadHeader />
               <DownloadBody

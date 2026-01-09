@@ -1,4 +1,4 @@
-﻿import "./NotificationContent.css";
+import "./NotificationContent.css";
 import ai_assistant_builder_icon from "../../assets/images/icon.png";
 import MarkdownRenderer from "../../helpers/MarkdownRenderer";
 import { useTranslation } from 'react-i18next';
@@ -14,20 +14,20 @@ const NotificationContent = ({
   return (
     <div>
       {version == "version" && (
-        <div className="loading-container">
+        <div className="loading-container" data-testid="notification-loading-state">
           <div className="loading-spinner"></div>
           <p>{t('notification.fetch_update')}</p>
         </div>
       )}
       {version == "error" && (
-        <div className="loading-container">
+        <div className="loading-container" data-testid="notification-error-state">
           <p>{t('notification.failed_to_fetch_update')}</p>
         </div>
       )}
       {version != "version" && version != "error" && (
         <>
 
-          <div className="ai_assistant_builder_header">
+          <div className="ai_assistant_builder_header" data-testid="notification-update-info">
             <div className="flex-container">
               <div className="flex-items">
                 <img width={64} src={ai_assistant_builder_icon} />
@@ -66,7 +66,7 @@ const NotificationContent = ({
             const day = String(date.getDate()).padStart(2, '0');
             const formattedDate = `${year}/${month}/${day}`;
             return (
-              <div key={index} className="notification-body">
+              <div key={index} className="notification-body" data-testid={`notification-release-note-${item.version}`}>
                 <h2>Release v{item.version} <span style={{ fontSize: "0.65em", fontStyle: "italic", fontWeight: "normal" }}>{formattedDate}</span></h2>
                 <MarkdownRenderer content={item.releaseNotes} />
               </div>

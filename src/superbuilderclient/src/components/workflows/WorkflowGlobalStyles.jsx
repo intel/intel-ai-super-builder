@@ -23,7 +23,7 @@ export function WorkflowContainer ({children, settingsButton=null}) {
                 <div className="workflow-header-start">
                     <span className="workflow-title">{getWorkflowLabel()}</span>
                     <div className="workflow-model-text">
-                        {recommendedModel !== "" && recommendedModel === getChatModel() ? (
+                        {recommendedModel.length>0 && recommendedModel.includes(getChatModel()) ? (
                             <Tooltip
                                 title="The recommended model for this workflow is currently in use."
                                 placement="bottom-start"
@@ -38,15 +38,17 @@ export function WorkflowContainer ({children, settingsButton=null}) {
                                 title={"This model is not recommended for the current workflow. Click to switch to the recommended model " + recommendedModel}
                                 placement="bottom-start"
                                 sx={{p:0, m:0}}
+                                data-testid="workflow-switch-model-tooltip"
                             >
                                 <IconButton
+                                    data-testid="workflow-switch-model-button"
                                     onClick={switchToWorkflowRecommendedModel}
                                 >
                                     <SuboptimalIcon fontSize="small" color="warning"/>
                                 </IconButton>
                             </Tooltip>
                         )}
-                        <span className={recommendedModel !== "" && recommendedModel === getChatModel() ? "optimal-model" : "suboptimal-model"}>{getChatModel()}</span>
+                        <span className={recommendedModel.length>0 && recommendedModel.includes(getChatModel()) ? "optimal-model" : "suboptimal-model"}>{getChatModel()}</span>
                     </div>
                 </div>
                 <div className="workflow-header-middle">
@@ -58,6 +60,7 @@ export function WorkflowContainer ({children, settingsButton=null}) {
                     </div>
                 )}
                 <IconButton
+                    data-testid="workflow-close-button"
                     onClick={closeWorkflow}
                     disabled={!isChatReady}
                     sx={{
@@ -77,7 +80,15 @@ export function WorkflowContainer ({children, settingsButton=null}) {
     );
 }
 
-export function WorkflowButton ({variant="contained", disabled=false, onClick, size="medium", text="Click Me", width="15%"}) {
+export function WorkflowButton ({
+    variant="contained", 
+    disabled=false, 
+    onClick, 
+    size="medium", 
+    text="Click Me", 
+    width="15%",
+    'data-testid': dataTestId
+}) {
     return (
         <Button
             className="workflow-input-button"
@@ -86,13 +97,24 @@ export function WorkflowButton ({variant="contained", disabled=false, onClick, s
             onClick={onClick}
             disabled={disabled}
             sx={{textTransform:"none", fontWeight:"100", width:width, borderRadius:"5px"}}
+            data-testid={dataTestId}
         >
             {text}
         </Button>
     );
 }
 
-export function WorkflowInput ({value, setValue, onChange, onEnterKeyDown=()=>{}, label="Enter value here", variant="outlined", maxRows=3, width="100%"}) {
+export function WorkflowInput ({
+    value,
+    setValue,
+    onChange,
+    onEnterKeyDown=()=>{},
+    label="Enter value here",
+    variant="outlined",
+    maxRows=3,
+    width="100%",
+    'data-testid': dataTestId,
+}) {
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             if (e.shiftKey && value !== "") {
@@ -105,7 +127,7 @@ export function WorkflowInput ({value, setValue, onChange, onEnterKeyDown=()=>{}
     };
 
     return (
-        <TextField 
+        <TextField
             className="workflow-text-input"
             label={label}
             variant={variant}
@@ -115,6 +137,7 @@ export function WorkflowInput ({value, setValue, onChange, onEnterKeyDown=()=>{}
             multiline
             maxRows={maxRows}
             sx={{width:width}}
+            data-testid={dataTestId} 
         />
     );
 }

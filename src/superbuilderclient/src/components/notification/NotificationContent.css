@@ -1,4 +1,4 @@
-﻿.notification-header {
+.notification-header {
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -46,7 +46,7 @@ h3 {
     align-items: normal;
     align-content: stretch;
   }
-
+  
   .ai_assistant_builder_header .flex-items:nth-child(1) {
     display: block;
     flex-grow: 0;
@@ -55,7 +55,7 @@ h3 {
     align-self: auto;
     order: 0;
   }
-
+  
   .ai_assistant_builder_header  .flex-items:nth-child(2) {
     display: block;
     flex-grow: 1;
@@ -64,7 +64,7 @@ h3 {
     align-self: auto;
     order: 0;
   }
-
+  
   .ai_assistant_builder_header  .flex-items:nth-child(3) {
     display: block;
     flex-grow: 0;
@@ -83,4 +83,4 @@ h3 {
     padding-left:10px;
   }
 
-
+  

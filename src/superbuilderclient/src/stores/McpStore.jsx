@@ -55,10 +55,10 @@ const useMcpStore = create((set, get) => ({
       const parsedJSONResult = JSON.parse(response);
       console.log("Parsed MCP Server JSON Result:", parsedJSONResult);
       set({ mcpServers: parsedJSONResult });
-      
+
       // Save to cache
       await saveLocalServersCache(parsedJSONResult);
-      
+
       // Update the installed status for marketplace servers after fetching local servers
       get().updateMarketplaceInstalledStatus();
     } catch (error) {
@@ -225,10 +225,66 @@ const useMcpStore = create((set, get) => ({
     }
   },
 
-  mcpServerTools: [],
+  mcpServerTools: {},
   fetchingMcpServerTools: false,
-  resetMcpServerTools: () => set({ mcpServerTools: [] }),
-  getMcpServerTools: async (server_name) => {
+  mcpToolsDialogOpen: false,
+  mcpToolsDialogServerName: "",
+  mcpToolsDialogServerConfig: null,
+  mcpToolsDialogAgentName: "",
+  mcpToolsDialogNeedsConfirmation: false,
+  mcpToolsDialogPendingServers: [],
+  mcpToolsDialogCurrentServerIndex: 0,
+  openMcpToolsDialog: (serverName, agentName = "", needsConfirmation = false, serverConfig = null) =>
+    set({
+      mcpToolsDialogOpen: true,
+      mcpToolsDialogServerName: serverName,
+      mcpToolsDialogServerConfig: serverConfig,
+      mcpToolsDialogAgentName: agentName,
+      mcpToolsDialogNeedsConfirmation: needsConfirmation
+    }),
+  closeMcpToolsDialog: () =>
+    set({
+      mcpToolsDialogOpen: false,
+      mcpToolsDialogServerName: "",
+      mcpToolsDialogServerConfig: null,
+      mcpToolsDialogAgentName: "",
+      mcpToolsDialogNeedsConfirmation: false,
+      mcpServerTools: {},
+      mcpToolsDialogPendingServers: [],
+      mcpToolsDialogCurrentServerIndex: 0
+    }),
+  confirmMcpTools: () => {
+    // User confirmed all servers - close the dialog
+    set({
+      mcpToolsDialogOpen: false,
+      mcpToolsDialogNeedsConfirmation: false,
+      mcpToolsDialogPendingServers: [],
+      mcpToolsDialogCurrentServerIndex: 0
+    });
+  },
+  rejectMcpTools: async () => {
+    const agentName = get().mcpToolsDialogAgentName;
+
+    // Close dialog first
+    set({
+      mcpToolsDialogOpen: false,
+      mcpToolsDialogNeedsConfirmation: false,
+      mcpServerTools: {}
+    });
+
+    // Stop the agent if there's an agent name
+    if (agentName) {
+      await get().stopMcpAgent(agentName);
+      useAppStore
+        .getState()
+        .showNotification(
+          `MCP Agent "${agentName}" stopped.`,
+          "info"
+        );
+    }
+  },
+  resetMcpServerTools: () => set({ mcpServerTools: {} }),
+  getMcpServerTools: async (server_name, showDialog = false, agentName = "", needsConfirmation = false) => {
     try {
       set({ fetchingMcpServerTools: true });
       console.debug("Fetching MCP Server Tools...");
@@ -237,22 +293,55 @@ const useMcpStore = create((set, get) => ({
       });
       const parsedJSONResult = JSON.parse(response);
       console.log(server_name, "Tools:", parsedJSONResult);
-      set({ mcpServerTools: parsedJSONResult });
+
+      // Store tools in a map indexed by server name
+      const currentTools = get().mcpServerTools;
+      set({ mcpServerTools: { ...currentTools, [server_name]: parsedJSONResult } });
+
+      // Open dialog if requested and tools were fetched successfully
+      if (showDialog && parsedJSONResult.length > 0) {
+        // Find the server config
+        const serverConfig = get().mcpServers.find(s => s.server_name === server_name);
+
+        set({
+          mcpToolsDialogOpen: true,
+          mcpToolsDialogServerName: server_name,
+          mcpToolsDialogServerConfig: serverConfig || null,
+          mcpToolsDialogAgentName: agentName,
+          mcpToolsDialogNeedsConfirmation: needsConfirmation
+        });
+      }
     } catch (error) {
       console.log("Failed to fetch MCP Server Tools:", error);
       // Handle GRPC style error messages
       const errorMessage = error.toString().includes("Status(StatusCode=")
         ? error.split('Detail="')[1].split('"')[0]
         : error.message || "Failed to fetch MCP Server Tools";
+
+      // Store error in the map
+      const currentTools = get().mcpServerTools;
       set({
-        mcpServerTools: [
-          {
-            name: "Error",
-            description: errorMessage,
-            type: "error",
-          },
-        ],
+        mcpServerTools: {
+          ...currentTools,
+          [server_name]: [
+            {
+              name: "Error",
+              description: errorMessage,
+              type: "error",
+            },
+          ]
+        },
       });
+
+      // Show dialog even on error if requested
+      if (showDialog) {
+        set({
+          mcpToolsDialogOpen: true,
+          mcpToolsDialogServerName: server_name,
+          mcpToolsDialogAgentName: agentName,
+          mcpToolsDialogNeedsConfirmation: needsConfirmation
+        });
+      }
     } finally {
       set({ fetchingMcpServerTools: false });
     }
@@ -470,6 +559,31 @@ const useMcpStore = create((set, get) => ({
         console.log("MCP Agent started successfully:", name);
         get().getActiveMcpAgents();
         get().getActiveMcpServers();
+
+        // Fetch and display tools for all servers in this agent
+        if (serverNames.length > 0) {
+          // Initialize the consent flow with all servers
+          set({
+            mcpToolsDialogPendingServers: serverNames,
+            mcpToolsDialogCurrentServerIndex: 0,
+            mcpServerTools: {} // Reset tools
+          });
+
+          // Fetch tools for all servers in parallel
+          const toolsFetchPromises = serverNames.map(serverName =>
+            get().getMcpServerTools(serverName, false, name, false)
+          );
+
+          await Promise.all(toolsFetchPromises);
+
+          // After all tools are fetched, open the dialog
+          set({
+            mcpToolsDialogOpen: true,
+            mcpToolsDialogServerName: serverNames[0], // Default to first server
+            mcpToolsDialogAgentName: name,
+            mcpToolsDialogNeedsConfirmation: true
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to start MCP Agent:", error);
@@ -558,7 +672,7 @@ const useMcpStore = create((set, get) => ({
   checkMarketplaceItemInstalled: (marketplaceItem, mcpServers, marketplaceServersById) => {
     // Check the cache to see what servers this marketplace item contains
     const cachedServers = marketplaceServersById[marketplaceItem.id];
-    
+
     // If we have cached server info for this item, check those specific server names
     if (cachedServers && cachedServers.length > 0) {
       return cachedServers.some(serverInfo => {
@@ -566,7 +680,7 @@ const useMcpStore = create((set, get) => ({
         return mcpServers.some(localServer => localServer.server_name === uniqueName);
       });
     }
-    
+
     // Fallback: check if any server name contains the marketplace item ID
     // This handles cases where we haven't fetched the details yet
     return mcpServers.some((server) => {
@@ -591,18 +705,18 @@ const useMcpStore = create((set, get) => ({
   getMarketplaceServers: async (pageNumber = 1, pageSize = 20, category = "", search = "", forceRefresh = false) => {
     try {
       const state = get();
-      
+
       // Step 1: Try to load from Tauri Store cache first (instant display)
       if (!forceRefresh && category === "" && search === "" && pageNumber === 1) {
         console.log("Checking for cached marketplace data...");
         const cachedData = await loadMarketplaceCache();
-        
+
         if (cachedData && cachedData.marketplaceServers?.length > 0) {
           console.log(" Using cached marketplace data (stale-while-revalidate):", {
             servers: cachedData.marketplaceServers.length,
             timestamp: new Date(cachedData.marketplaceLastFetch).toLocaleString()
           });
-          
+
           // Immediately set the cached data (no loading spinner)
           set({
             marketplaceServers: cachedData.marketplaceServers,
@@ -610,21 +724,21 @@ const useMcpStore = create((set, get) => ({
             marketplaceCurrentPage: pageNumber,
             marketplaceLoading: false, // Don't show loading for cached data
           });
-          
+
           // Update installed status with cached local servers if available
           const cachedLocalServers = await loadLocalServersCache();
           if (cachedLocalServers && cachedLocalServers.mcpServers?.length > 0) {
             set({ mcpServers: cachedLocalServers.mcpServers });
           }
-          
+
           // Also restore marketplaceServersById cache
           const cachedServersById = await loadMarketplaceServersByIdCache();
           if (cachedServersById) {
             set({ marketplaceServersById: cachedServersById.marketplaceServersById || {} });
           }
-          
+
           state.updateMarketplaceInstalledStatus();
-          
+
           // Continue to fetch fresh data in background (don't return here)
           console.log("Fetching fresh data in background...");
         }
@@ -651,7 +765,7 @@ const useMcpStore = create((set, get) => ({
       // console.log("MCP Marketplace Servers:", result);
 
       const currentState = get();
-      
+
       // Transform the API response to match our internal structure
       const transformedServers = result.data?.mcp_server_list?.map(server => {
         const marketplaceItem = {
@@ -670,7 +784,7 @@ const useMcpStore = create((set, get) => ({
           url: "",
           env: "",
         };
-        
+
         // Check if this item is installed
         return {
           ...marketplaceItem,
@@ -688,15 +802,15 @@ const useMcpStore = create((set, get) => ({
         marketplaceLastFetch: Date.now(), // Update last fetch timestamp
         marketplaceTotalPages: Math.ceil((result.data?.total_count || 0) / pageSize)
       };
-      
+
       set(newState);
-      
+
       // Step 3: Save fresh data to Tauri Store cache
       if (category === "" && search === "" && pageNumber === 1) {
         await saveMarketplaceCache({
           marketplaceServers: transformedServers,
         });
-        
+
         // Also save marketplaceServersById cache
         const serversById = get().marketplaceServersById;
         if (Object.keys(serversById).length > 0) {
@@ -740,7 +854,7 @@ const useMcpStore = create((set, get) => ({
       //             ],
       //             "command": "uvx"
       //           }
-      //         }      
+      //         }
       // The mcpServers is an object with server names as keys
       const mcpServersObject = result.data?.server_config?.[0]?.mcpServers || {};
 
@@ -756,14 +870,14 @@ const useMcpStore = create((set, get) => ({
         ...get().marketplaceServersById,
         [id]: transformedServers
       };
-      
-      set({ 
+
+      set({
         marketplaceServersById: updatedServersById
       });
-      
+
       // Save to Tauri Store cache
       await saveMarketplaceServersByIdCache(updatedServersById);
-      
+
       return transformedServers;
     } catch (error) {
       console.error(`Failed to fetch MCP Marketplace Server ${id}: ${error}`);

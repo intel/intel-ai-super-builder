@@ -1,4 +1,4 @@
-﻿import "./ModelSettings.css";
+import "./ModelSettings.css";
 import React, { useState, useContext, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Button, Checkbox, Tooltip, FormControlLabel } from "@mui/material";
@@ -215,6 +215,7 @@ const ModelSettings = () => {
           <FormControlLabel
             control={
               <Checkbox
+                data-testid={`model-settings-${name}-checkbox`}
                 disabled={!canChangeValue}
                 checked={user_value}
                 onChange={(e) => applySetting(categoryName, name, e.target.checked)}
@@ -226,7 +227,7 @@ const ModelSettings = () => {
                   overall_description={overallDescription}
                   high_description={highDescription}
                   low_description={lowDescription}
-                />
+                />             
                 <span className="information-label">{displayName}</span>
               </div>
             }
@@ -269,6 +270,7 @@ const ModelSettings = () => {
             <span className="information-label">{displayName}</span>
           </div>
           <TextField
+            data-testid={`model-settings-${name}-input`}
             className="model-settings-text-input"
             multiline
             rows={4}
@@ -297,6 +299,7 @@ const ModelSettings = () => {
         title={displayName}
         description={description}
         variant="small"
+        data-testid={`model-settings-${name}-accordion`}
       >
         <div className="accordion-section">
           {fields.map(
@@ -304,6 +307,7 @@ const ModelSettings = () => {
               renderParameter(name, fieldData)
           )}
           <Button
+            data-testid={`model-settings-${name}-reset-button`}
             variant="contained"
             onClick={() => resetSectionToDefaults(name)}
             disabled={!canChangeValue}
@@ -317,6 +321,7 @@ const ModelSettings = () => {
 
   return isValid ? (
     <SimpleAccordion
+      data-testid="model-settings-accordion"
       title={t("setting.parameters.title")}
       description={t("setting.parameters.description")}
     >

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -80,7 +80,7 @@ const useModelStore = create((set) => ({
       set({ error: "Input is too long." });
       return false;
     }
-
+  
     //check for presence of potentially dangerous characters
     const dangerousCharacters = /[<>;'"`]/;
     if (dangerousCharacters.test(userInput)) {
@@ -217,7 +217,7 @@ const useModelStore = create((set) => ({
     return true;
   },
 
-  convertModel: async (isHfInputModelPath = false) => {
+  convertModel: async (isHfInputModelPath = false, tokenId = null) => {
     const modelID = useModelStore.getState().hfModelInput;
     const separator = isHfInputModelPath ? "\\" : "/";
     const modelName = modelID.split(separator).pop();
@@ -239,6 +239,11 @@ const useModelStore = create((set) => ({
         };
         request.parameters = sanitizedParams;
       }
+
+      if (tokenId !== null && tokenId.trim() !== "") {
+        request.tokenId = tokenId;
+      }
+
       await invoke("convert_model", request);
 
       set({

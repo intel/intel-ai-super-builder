@@ -8,11 +8,11 @@ import { invoke } from "@tauri-apps/api/core";
 const Modal = ({ isOpen, onClose, children, isInit}) => {
   if(isInit || isOpen) {
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" data-testid="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {children}
         {!isInit && (
-        <button onClick={onClose}>Close</button> )}
+        <button data-testid="modal-close-button" onClick={onClose}>Close</button> )}
       </div>
     </div>
   );

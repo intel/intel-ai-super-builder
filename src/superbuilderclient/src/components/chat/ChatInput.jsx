@@ -97,12 +97,13 @@ const ChatInput = ({
           maxRows={4}
           fullWidth
           disabled={!isChatReady}
+          data-testid="chat-message-input-textfield"
           InputProps={{
             disableUnderline: true,
-          }}         
+          }}
           sx={{
-            userSelect:"none", 
-            borderRadius:"10px", 
+            userSelect:"none",
+            borderRadius:"10px",
             padding:"14px",
             '& .MuiInputBase-root': { color:"var(--text-primary-color)", fontFamily: 'IntelOne Display, sans-serif' }
           }}
@@ -111,9 +112,10 @@ const ChatInput = ({
           {!isWaitingForFirstToken && !isStreamCompleted ? (
             <IconButton
               onClick={stopChatGeneration}
+              data-testid="chat-stop-generation-button"
               sx={{
-                width:"40px", 
-                height:"40px", 
+                width:"40px",
+                height:"40px",
                 backgroundColor:"#ff5050",
                 '&:hover': {
                   backgroundColor: '#ff8383ff',
@@ -131,6 +133,7 @@ const ChatInput = ({
             <IconButton
               onClick={sendMessage}
               disabled={!isChatReady || input === "" || !readyToChat}
+              data-testid="chat-send-message-button"
               sx={{width:"40px", height:"40px", backgroundColor:"var(--primary-main-color)", "&.Mui-disabled": {background: "rgb(196, 196, 196)"}}}
             >
               <PlayArrowIcon

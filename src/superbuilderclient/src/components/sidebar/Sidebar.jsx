@@ -1,5 +1,5 @@
 import "./Sidebar.css";
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef, use } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { ChatContext } from "../context/ChatContext";
 import { WorkflowContext } from "../context/WorkflowContext";
@@ -9,9 +9,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import NewWorkflowIcon from "@mui/icons-material/AddCircle";
 import HistoryIcon from "@mui/icons-material/History";
 import AdminIcon from "@mui/icons-material/ManageAccounts";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import CloudIcon from "@mui/icons-material/Cloud";
-// import mcpLogo from '../../assets/images/mcp-logo.svg'; 
+import McpMarketplaceIcon from "@mui/icons-material/LocalMall";
+import MCPIcon from "../../assets/mcpIcon/Mcpicon";
 import { useTranslation } from "react-i18next";
 import McpManagement from "../mcpManagement/McpManagement";
 import McpMarketPlace from "../mcpManagement/McpMarketPlace";
@@ -23,7 +22,8 @@ import Setting from "../setting/Setting";
 const Sidebar = ({}) => {
   const { t } = useTranslation();
   const { config, getDBConfig } = useDataStore();
-  const { newSession, isChatReady, newChatModelNeeded } = useContext(ChatContext);
+  const { newSession, isChatReady, newChatModelNeeded } =
+    useContext(ChatContext);
   const {
     workflowSidebarVisible: isWorkflowOpen,
     setWorkflowSidebarVisible: setIsWorkflowOpen,
@@ -54,6 +54,7 @@ const Sidebar = ({}) => {
     setIsHistoryOpen(!isHistoryOpen);
     // Close marketplace when opening history
     useMcpStore.getState().closeMcpMarketplace();
+    useMcpStore.getState().closeMcpManagement();
   };
 
   const handleSetting = () => {
@@ -62,6 +63,7 @@ const Sidebar = ({}) => {
     setIsSettingOpen(!isSettingOpen);
     // Close marketplace when opening settings
     useMcpStore.getState().closeMcpMarketplace();
+    useMcpStore.getState().closeMcpManagement();
   };
 
   const handleWorkflow = () => {
@@ -70,21 +72,30 @@ const Sidebar = ({}) => {
     setIsWorkflowOpen(!isWorkflowOpen);
     // Close marketplace when opening workflow
     useMcpStore.getState().closeMcpMarketplace();
+    useMcpStore.getState().closeMcpManagement();
   };
 
   const handleMarketplace = () => {
-    if (mcpMarketplaceOpen) {
-      useMcpStore.getState().closeMcpMarketplace();
-    } else {
+    setIsSettingOpen(false);
+    setIsHistoryOpen(false);
+    setIsWorkflowOpen(false);
+    useMcpStore.getState().closeMcpManagement();
+    if (!mcpMarketplaceOpen) {
       useMcpStore.getState().openMcpMarketplace();
+    } else {
+      useMcpStore.getState().closeMcpMarketplace();
     }
   };
 
   const handleManagement = () => {
-    if (mcpManagementOpen) {
-      useMcpStore.getState().closeMcpManagement();
-    } else {
+    setIsSettingOpen(false);
+    setIsHistoryOpen(false);
+    setIsWorkflowOpen(false);
+    useMcpStore.getState().closeMcpMarketplace();
+    if (!mcpManagementOpen) {
       useMcpStore.getState().openMcpManagement();
+    } else {
+      useMcpStore.getState().closeMcpManagement();
     }
   };
 
@@ -101,12 +112,21 @@ const Sidebar = ({}) => {
   }, [config]);
 
   useEffect(() => {
-    if (isChatReady == false && newChatModelNeeded == true && isSettingOpen == false) {
+    if (
+      isChatReady == false &&
+      newChatModelNeeded == true &&
+      isSettingOpen == false
+    ) {
       handleSetting();
     }
   }, [isChatReady, newChatModelNeeded, isSettingOpen]);
 
-  const isOpen = isSettingOpen || isHistoryOpen || isWorkflowOpen || mcpMarketplaceOpen || mcpManagementOpen;
+  const isOpen =
+    isSettingOpen ||
+    isHistoryOpen ||
+    isWorkflowOpen ||
+    mcpMarketplaceOpen ||
+    mcpManagementOpen;
 
   const SidebarBox = ({
     isChatReady,
@@ -118,64 +138,89 @@ const Sidebar = ({}) => {
     settingVisibility,
   }) => {
     const { t } = useTranslation();
-    
-    const SidebarButton = ({title, icon, onClick, additionalClasses=""}) => {
+
+    const SidebarButton = ({
+      title,
+      icon,
+      onClick,
+      additionalClasses = "",
+      'data-testid': dataTestId,
+    }) => {
       return (
-        <button 
+        <button
           title={title}
           className={`sidebar-button ` + additionalClasses}
           onClick={onClick}
           disabled={!isChatReady}
+          data-testid={dataTestId}
         >
           {icon}
         </button>
-      ); 
-    }
+      );
+    };
 
     return (
-      <div className="sidebarbox">
+      <div className="sidebarbox" data-testid="sidebar-main-container">
         <SidebarButton
           additionalClasses="new-chat-button"
-          title={t('sidebar.new_chat')}
+          title={t("sidebar.new_chat")}
           onClick={() => {
             if (isChatReady) {
               toggleWorkflow();
             }
           }}
-          icon={<NewWorkflowIcon className="sidebar-icon" color="primary" sx={{fontSize: "50px"}}/>}
+          icon={
+            <NewWorkflowIcon
+              className="sidebar-icon"
+              color="primary"
+              sx={{ fontSize: "50px" }}
+            />
+          }
+          data-testid="sidebar-new-chat-button"
         />
         <SidebarButton
-          title={t('sidebar.chat_history')}
+          title={t("sidebar.chat_history")}
           onClick={() => {
             if (isChatReady) {
               toggleHistory();
             }
           }}
-          icon={<HistoryIcon className="sidebar-icon" fontSize="large"/>}
+          icon={<HistoryIcon className="sidebar-icon" fontSize="large" />}
+          data-testid="sidebar-chat-history-button"
         />
-        <SidebarButton
+        {/* <SidebarButton
           title={t("sidebar.mcp_marketplace", "MCP Marketplace")}
           onClick={toggleMarketplace}
-          icon={<CloudIcon className="sidebar-icon" fontSize="large"/>}
+          icon={<McpMarketplaceIcon className="sidebar-icon" fontSize="large"/>}
+          data-testid="sidebar-mcp-marketplace-button"
         />
         <SidebarButton
           title={t("sidebar.mcp_management", "MCP Management")}
           onClick={toggleManagement}
-          icon={<StorefrontIcon className="sidebar-icon" fontSize="large"/>}
-        />
+          icon={<MCPIcon className="sidebar-icon mcpmanagement-icon" fontSize="large" />}
+          data-testid="sidebar-mcp-management-button"
+        /> */}
         <div className="spacer"></div>
         <div className="admin">
           <SidebarButton
-            title={t('sidebar.admin_mode') + ' - '  + (config.is_admin ? t('sidebar.mode_enable') : t('sidebar.mode_disable'))}
+            title={
+              t("sidebar.admin_mode") +
+              " - " +
+              (config.is_admin
+                ? t("sidebar.mode_enable")
+                : t("sidebar.mode_disable"))
+            }
             onClick={handleSetAdmin}
-            icon={<AdminIcon className="sidebar-icon" fontSize="large"/>}
+            icon={<AdminIcon className="sidebar-icon" fontSize="large" />}
+            data-testid="sidebar-admin-toggle-button"
           />
         </div>
         {settingVisibility && (
           <SidebarButton
-            title={t('sidebar.setting')}
+            title={t("sidebar.setting")}
             onClick={toggleSetting}
-            icon={<SettingsIcon className="sidebar-icon" fontSize="large"/>}
+            icon={<SettingsIcon className="sidebar-icon" fontSize="large" />}
+            data-testid="sidebar-settings-button"
           />
         )}
       </div>
@@ -185,7 +230,7 @@ const Sidebar = ({}) => {
   return (
     <>
       {isOpen && <div className="overlay" onClick={closePanels} />}
-      <div className="sidebar-container" ref={sidebarRef}>
+      <div className="sidebar-container" data-testid="sidebar-root" ref={sidebarRef}>
         <SidebarBox
           isChatReady={isChatReady}
           newSession={newSession}
@@ -236,7 +281,7 @@ const Sidebar = ({}) => {
           content={
             <WorkflowOptions
               onWorkflowSelected={() => {
-                setIsWorkflowOpen(false)
+                setIsWorkflowOpen(false);
                 // if (mcpManagementOpen) {
                 //   useMcpStore.getState().closeMcpManagement();
                 // }
@@ -250,4 +295,3 @@ const Sidebar = ({}) => {
 };
 
 export default Sidebar;
-

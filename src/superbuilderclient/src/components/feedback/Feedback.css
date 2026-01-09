@@ -1,4 +1,4 @@
-﻿@keyframes fadeIn {
+@keyframes fadeIn {
     from {
         opacity: 0;
     }
@@ -19,7 +19,7 @@
 }
 .bottomfeedbackrow{
     justify-content: flex-end;
-    display: flex;
+    display: flex; 
 }
 
 .quick-buttons-column{
@@ -165,13 +165,13 @@
 }
 .feedback-received-message-green {
     opacity: 1;
-    color: green;
+    color: green; 
     margin-right: 10px;
     /* Other styles as needed */
 }
 .feedback-received-message-red {
     opacity: 1;
-    color: #c00000;
+    color: #c00000; 
     margin-right: 10px;
 }
 
@@ -185,8 +185,8 @@
     transition: opacity 0.5s ease-in-out; /* Smooth transition for the opacity */
 }
 .email-appended-message {
-    opacity: 0.8;
-    color: #666;
+    opacity: 0.8;    
+    color: #666; 
     margin-left: auto;
     font-size: 0.8em;
     /* Other styles as needed */
@@ -227,10 +227,10 @@
     animation: fadeIn 0.5s forwards;
 }
 .feedback-send-button.up {
-    background-color: #8bae46;
+    background-color: #8bae46; 
 }
 .feedback-send-button.down {
-    background-color: #edb200;
+    background-color: #edb200; 
 }
 
 .feedback-button.feedback-email{

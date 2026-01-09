@@ -6,11 +6,11 @@ import { useTranslation } from "react-i18next";
 import "./McpServerTable.css";
 import useMcpStore from "../../stores/McpStore";
 import { ChatContext } from "../context/ChatContext";
-import { 
-  MCP_TABLE_STYLES, 
-  createTextColumn, 
-  generateUniqueRows, 
-  MCP_DATAGRID_PROPS 
+import {
+  MCP_TABLE_STYLES,
+  createTextColumn,
+  generateUniqueRows,
+  MCP_DATAGRID_PROPS,
 } from "./mcpTableShared";
 
 export default function McpServerTable({ layoutMode = "vertical" }) {
@@ -27,8 +27,8 @@ export default function McpServerTable({ layoutMode = "vertical" }) {
   });
 
   // Use shared utility to generate unique rows
-  const mcpServers = React.useMemo(() => 
-    generateUniqueRows(rawMcpServers, 'server_name'), 
+  const mcpServers = React.useMemo(
+    () => generateUniqueRows(rawMcpServers, "server_name"),
     [rawMcpServers]
   );
 
@@ -44,12 +44,14 @@ export default function McpServerTable({ layoutMode = "vertical" }) {
       const isWide = window.innerWidth > 1330;
       const loadingPosition = isWide ? "end" : "center";
       return (
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          height: '100%',
-          width: '100%'
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+          }}
+        >
           <Button
             size="small"
             variant="contained"
@@ -136,17 +138,26 @@ export default function McpServerTable({ layoutMode = "vertical" }) {
     setIsChatReady(true);
   };
 
-  const commandColumns = React.useMemo(() => [
-    createTextColumn("server_name", t("mcp.server_table.name"), 0.5, 120),
-    createTextColumn("command", t("mcp.server_table.command"), 0.6, 150),
-    createTextColumn("args", t("mcp.server_table.command_args"), 1, 200),
-    createTextColumn("url", t("mcp.server_table.url"), 1, 200),
-    createTextColumn("env", t("mcp.server_table.env"), 0.7, 150),
-    createActionsColumn(),
-  ], [t, runningMcpServers, loadingMcpServers, isChatReady]);
+  const commandColumns = React.useMemo(
+    () => [
+      createTextColumn("server_name", t("mcp.server_table.name"), 0.5, 120),
+      createTextColumn("command", t("mcp.server_table.command"), 0.6, 150),
+      createTextColumn("args", t("mcp.server_table.command_args"), 1, 200),
+      createTextColumn("url", t("mcp.server_table.url"), 1, 200),
+      createTextColumn("env", t("mcp.server_table.env"), 0.7, 150),
+      createActionsColumn(),
+    ],
+    [t, runningMcpServers, loadingMcpServers, isChatReady]
+  );
 
-  const paperStyle = layoutMode === "horizontal" ? MCP_TABLE_STYLES.paperHorizontal : MCP_TABLE_STYLES.paper;
-  const dataGridStyle = layoutMode === "horizontal" ? MCP_TABLE_STYLES.dataGridHorizontal : MCP_TABLE_STYLES.dataGrid;
+  const paperStyle =
+    layoutMode === "horizontal"
+      ? MCP_TABLE_STYLES.paperHorizontal
+      : MCP_TABLE_STYLES.paper;
+  const dataGridStyle =
+    layoutMode === "horizontal"
+      ? MCP_TABLE_STYLES.dataGridHorizontal
+      : MCP_TABLE_STYLES.dataGrid;
 
   return (
     <Box sx={MCP_TABLE_STYLES.container}>

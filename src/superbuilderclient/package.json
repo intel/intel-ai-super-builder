@@ -1,7 +1,7 @@
 {
   "name": "intel-ai-assistant-ui",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.7.0",
   "type": "module",
   "author": "[Intel Corporation]",
   "license": "MIT",
@@ -14,7 +14,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "dependencies": {
     "@emotion/react": "^11.13.0",
@@ -49,9 +51,11 @@
   "devDependencies": {
     "@tauri-apps/cli": "2.2.7",
     "@vitejs/plugin-react": "^4.3.4",
+    "prettier": "^3.7.4",
     "vite": "^6.4.1"
   },
   "overrides": {
-    "prismjs": "^1.30.0"
+    "prismjs": "^1.30.0",
+    "mdast-util-to-hast": "^13.2.1"
   }
 }

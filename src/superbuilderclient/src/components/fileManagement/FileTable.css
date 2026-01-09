@@ -1,4 +1,4 @@
-﻿/* FileTable.css */
+/* FileTable.css */
 .file-text {
   max-width: 180px;
   white-space: nowrap;
@@ -10,7 +10,7 @@
     max-width: 800px;
     white-space: wrap;
     display: inline-block;
-    overflow: visible;
+    overflow: visible; 
 }
 
 .date-text {
@@ -56,4 +56,4 @@
 }
 
 
-
+  

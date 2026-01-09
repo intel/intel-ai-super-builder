@@ -1,4 +1,4 @@
-﻿.overlay {
+.overlay {
   position: fixed;
   top: 40px;
   left: 0;
@@ -16,7 +16,7 @@
 .sidebarbox {
   height: 100%;
   width: var(--sidebar-width);
-  padding: 5px 2px 25px 2px;
+  padding: 5px 4px 25px 2px;
   background-color: var(--secondary-main-color, #ffffff);
   box-sizing: border-box;
   display: flex;
@@ -48,6 +48,14 @@
   color: #333333;
 }
 
+.sidebar-icon:last-child {
+  margin-bottom: 0; 
+}
+
+.mcpmanagement-icon {
+  margin-top: 4px; 
+}
+
 .sidebar-icon:hover {
   color: var(--primary-light-color);
 }
@@ -57,11 +65,13 @@
   width: 28px;
   height: 28px;
   border-radius: 30px;
+  color: #333333;
 }
 
 .sidebar-image-icon:hover {
-  /* background-color: var(--primary-light-color); */
   opacity: 0.5;
+  color: var(--primary-light-color);
+
 }
 
 .spacer {

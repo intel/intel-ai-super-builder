@@ -429,6 +429,7 @@ message SetUserConfigViewModelResponse {
 message ConvertModelRequest {
 	string model_path = 1;
 	optional string parameters = 2;
+	optional string token_id = 3;
 }
 
 message ConvertModelResponse {
@@ -491,11 +492,6 @@ message ValidateModelResponse {
 // =====
 // MCP
 // =====
-
-message CommonMCPResponse {
-  bool success = 1;
-  string message = 2;
-}
 
 // ============ MCP Agent ================
 message MCPAgent {

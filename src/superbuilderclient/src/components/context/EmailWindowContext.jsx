@@ -1,4 +1,4 @@
-﻿import { createContext, useRef, useEffect, useContext } from "react";
+import { createContext, useRef, useEffect, useContext } from "react";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { AppStatusContext } from "../context/AppStatusContext";
 import { invoke } from "@tauri-apps/api/core";
@@ -20,7 +20,7 @@ const EmailWindowProvider = ({ children }) => {
         emailWebviewRef.current = existingWindow;
         return;
       }
-
+      
       console.log("Creating email webview window instance...");
       emailWebviewRef.current = new WebviewWindow("EmailWindow", {
         url: "email_window.html",

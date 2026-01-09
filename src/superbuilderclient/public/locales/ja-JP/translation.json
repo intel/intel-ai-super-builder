@@ -5,8 +5,8 @@
     "part_2": "最小ハードウェア要件をご確認ください：",
     "part_3": "CPU: Intel® Core™ Ultra プロセッサ シリーズ 1(開発コード名: Meteor Lake)",
     "part_4": "メモリ(RAM): 16GB",
-    "part_5": "ストレージ: 1つのAIアシスタント用LLMあたり4GB",
-    "part_6": "GPU: 内蔵Intel® Graphics (ドライバーバージョン30.0.100.9955以降）",
+    "part_5": "ストレージ: 1つのSuper Builder用LLMあたり4GB",
+    "part_6": "GPU: 内蔵Intel® Graphics (ドライバーバージョン32.0.101.8132以降）",
     "part_7": "ネットワーク: ブロードバンド接続 (LMおよびその他のコンポーネントのダウンロード用)",
     "model_download_status": "モデルダウンロード状況"
   },
@@ -14,6 +14,11 @@
     "title": "警告：お使いのハードウェアは検証されていません",
     "part_1": "お使いのシステムはSuperBuilderチームによって検証されていません。",
     "part_2": "このソフトウェアを引き続きご利用いただけますが、最適なパフォーマンスを保証できないことにご注意ください。"
+  },
+  "active_file_tooltip": {
+    "part_1": "AIエージェントに関連するファイルのみを追加してください。",
+    "part_2": "適切なコンテキストを提供することで、回答がより正確でトピックに沿ったものになり、無関係な結果が減少します。",
+    "part_3": "ヒント：質問に直接一致するファイルを選択してください。"
   },
   "draganddrop": {
     "button": {
@@ -47,7 +52,8 @@
   "mcp": {
     "ui": {
       "back": "スーパーエージェントに戻る",
-      "add": "MCPサーバーを追加",
+      "mcp_marketplace": "MCPマーケットプレイス",
+      "add": "MCPマネージャーに追加",
       "edit": "MCPサーバー情報を編集",
       "remove": "MCPサーバーを削除",
       "mcp_server": "MCPサーバー",
@@ -80,7 +86,33 @@
       "mcp_agent_mcp_server_note": "注意: エージェントを開始するには、最低1つのMCPサーバーが必要です",
       "confirm_remove": "削除の確認",
       "confirm_remove_message": "選択された設定が削除されます。よろしいですか?",
-      "remove_button": "削除"
+      "remove_button": "削除",
+      "docker_recommendation_title": "推奨：",
+      "docker_recommendation_description": "より高いセキュリティと分離性のために、Docker を使用したコマンド方式で MCP サーバーを追加することを推奨します（Docker Desktop が必要です）。",
+      "docker_recommendation_visit": "訪問",
+      "docker_servers_link": "Docker MCP Hub",
+      "docker_recommendation_suffix": "注意：システムにDocker Desktopがインストールされている必要があります。"
+    },
+    "tools_dialog": {
+      "title": "MCP サーバーツール",
+      "confirm_title": "MCPサーバーツールの確認と承認",
+      "confirm_title_multi": "エージェントツールの確認",
+      "consent_alert_title": "MCPエージェントがツールの承認を必要としています",
+      "consent_message": "MCP エージェント \"{{agentName}}\" はこれらのツールを必要としています。確認して承認してください。",
+      "consent_message_multi": "このエージェントは以下のMCPサーバーとツールに依存して動作します。それらを慎重に確認し、安全で信頼できるソースからのものであることを確認してください。",
+      "loading": "ツールを取得中...",
+      "no_tools": "利用可能なツールがありません",
+      "no_description": "説明がありません",
+      "available_tools": "利用可能なツール",
+      "server_name": "MCP サーバー名",
+      "command": "コマンド",
+      "url": "URL",
+      "environment": "環境変数",
+      "parameters": "パラメータ",
+      "close": "閉じる",
+      "confirm": "承認して続行",
+      "reject": "拒否してエージェントを停止",
+      "server_indicator": "MCPサーバー {{current}} / {{total}}"
     },
     "server_table": {
       "command_title": "コマンド付きMCPサーバー",
@@ -103,7 +135,29 @@
       "system_prompt": "システムプロンプト",
       "mcp_server": "MCPサーバー",
       "actions": "アクション",
-      "remove": "削除"
+      "remove": "削除",
+      "no_mcpserver": "MCPサーバーが選択されていません"
+    },
+    "marketplace": {
+      "title": "MCPマーケットプレイス",
+      "refresh": "マーケットプレイスを更新",
+      "loading": "マーケットプレイスのアイテムを読み込み中...",
+      "install": "インストール",
+      "install_docker": "Dockerイメージをインストール",
+      "uninstall": "アンインストール",
+      "installing": "インストール中...",
+      "uninstalling": "アンインストール中...",
+      "installed": "インストール済み",
+      "running": "実行中",
+      "empty": "利用可能なマーケットプレイスのアイテムがありません",
+      "search": "名前、公開者、キーワードで検索...",
+      "showing_results": "結果を表示",
+      "no_results": "結果が見つかりませんでした",
+      "clear_search": "検索をクリア",
+      "close": "閉じる",
+      "by": "公開者",
+      "views": "閲覧",
+      "no_description": "説明なし"
     }
   },
   "chat": {
@@ -113,6 +167,8 @@
     "placeholder": "ここに質問を入力してください",
     "placeholder_generate_image": "画像を生成",
     "processing": "処理中...",
+    "thinking": "考え中",
+    "thought": "考えた内容",
     "disclaimer_part_1": "免責事項：チャットボットとやりとりしています。",
     "disclaimer_part_2": "チャットボットは間違いを犯す可能性があります。重要な情報・判断は、別のソースも併せて確認してください。",
     "imageinfo": "画像関連のタスクが完了したら、標準的なクエリでより良い応答を得るために、テキストLLMに戻してください。",
@@ -139,17 +195,18 @@
       "notice": "画像関連のタスクが完了したら、標準的なクエリでより良い応答を得るために、テキストLLMに戻してください。",
       "welcome": "ようこそ、",
       "subwelcome": "今日は何をお手伝い致しますか？",
-      "current_model": "現在のモデル："
+      "current_model": "現在のモデル：",
+      "workflow_placeholder": "何でも質問してください - エージェントは間違いを起こす可能性があります。重要な情報を確認してください。"
     }
   },
   "topbar": {
     "title": "について ",
-    "content_part_1": "このアシスタントはインテル® アシスタント・ビルダーフレームワークをベースにしています。アシスタントは、このコンピュータのハードウェアのAI PC機能を使用するように最適化されています。最新のAI PC情報と製品の提供状況については、",
+    "content_part_1": "このアプリケーションはインテル® AI スーパービルダーフレームワークをベースにしています。アプリケーションは、このコンピュータのハードウェアのAI PC機能を使用するように最適化されています。最新のAI PC情報と製品の提供状況については、",
     "content_part_2": "Intel.com/AIPC",
     "content_part_3": "をご覧ください。",
-    "content_part_4": "Assistant Builder アプリケーションパッケージ：",
+    "content_part_4": "AI Super Builder アプリケーションパッケージ：",
     "content_part_4_1": "こちらをご覧ください",
-    "content_part_5": "Intel® AI Assistant Builder ウェブサイト",
+    "content_part_5": "Intel® AI Super Builder ウェブサイト",
     "content_part_6": "チャットモデル：",
     "content_part_7": "埋め込みモデル：",
     "content_part_8": "リランカーモデル：",
@@ -171,7 +228,7 @@
   "model_downloader": {
     "head": {
       "part_1": "初回セットアップ",
-      "part_2": "必要なファイルを取得し、AIアシスタントモデルを読み込み中"
+      "part_2": "必要なファイルを取得し、モデルを読み込み中"
     },
     "body": {
       "consent_message": "以下にリストされたモデルが必要です。それぞれの利用規約を確認し、「続行」をクリックしてください。",
@@ -190,7 +247,7 @@
     }
   },
   "email": {
-    "title_1": "メールアシスタント",
+    "title_1": "メールヘルパー",
     "title_2": "メールの下書きです。自由に編集してください。",
     "subject": "件名：",
     "message": "本文：",
@@ -334,7 +391,7 @@
       "steps": {
         "title": "モデル準備の手順は以下のとおりです：",
         "step1": "まず、OpenVINOサポート付きのHuggingFaceのOptimumパッケージをインストールしてください。",
-        "step2": "現在のフレームワークはtransformersバージョン4.40.1が必要です。",
+        "step2": "現在のフレームワークはtransformersバージョン4.53.0が必要です。",
         "step3": "次に、以下のコマンドを使用してint4 symmetric 形式でモデルをダウンロードし量子化します。",
         "step3_note": "ここで<1><MODEL_ID></1>はHuggingFaceのモデルIDに対応し、<1><OUTPUT></1>は生成されたOVモデルが保存されるパスです。",
         "step4": "LLMの場合、<1>--task text-generation-with-past</1>を使用でき、<1>group_size</1>、<1>sym</1>、<1>ratio</1>などのパラメータが必要になります😊",

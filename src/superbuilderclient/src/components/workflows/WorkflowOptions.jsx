@@ -22,12 +22,20 @@ const WorkflowOptions = ({onWorkflowSelected}) => {
         setWorkflow(newWorkflow); // set new active workflow UI
     };
 
-    const WorflowOption = ({classNames="", workflowType="Generic", icon, isSelected=false, workflowSelected}) => {
+    const WorflowOption = ({
+        classNames="",
+        workflowType="Generic",
+        icon,
+        isSelected=false,
+        workflowSelected,
+        "data-testid": dataTestId
+    }) => {
         const label = getWorkflowLabel(workflowType);
         return (
-            <div 
+            <div
                 className={((selectedWorkflow===workflowType) ? "active-workflow-option" : "inactive-workflow-option") + " workflow-option " + (!isAppReady ? " disabled-workflow-option " : "") + classNames}
                 title={label}
+                data-testid={dataTestId}
                 onClick={() => {
                     if (isAppReady) {
                         switchWorkflow(workflowType);
@@ -47,31 +55,38 @@ const WorkflowOptions = ({onWorkflowSelected}) => {
                 classNames="large-workflow-option"
                 icon={<ChatIcon className="workflow-icon"/>}
                 workflowType="Generic"
+                data-testid="workflow-generic-chat-option"
             />           
             <span className="special-features-title"></span>
             <WorflowOption
                 icon={<img className="workflow-image-icon" src={MCPIcon} alt="MCP Logo" />}
                 workflowType="SuperAgent"
+                data-testid="workflow-super-agent-option"
             />
             <WorflowOption
                 icon={<QueryTablesIcon className="workflow-icon"/>}
                 workflowType="QueryTables"
+                data-testid="workflow-query-tables-option"
             />
             <WorflowOption
                 icon={<SummarizeQueryIcon className="workflow-icon"/>}
                 workflowType="Summarize"
+                data-testid="workflow-summarize-option"
             />
             <WorflowOption
                 icon={<ImageGenerationIcon className="workflow-icon"/>}
                 workflowType="QueryImages"
+                data-testid="workflow-query-images-option"
             />
             <WorflowOption
                 icon={<ResumeQueryIcon className="workflow-icon"/>}
                 workflowType="ScoreResumes"
+                data-testid="workflow-score-resumes-option"
             />
             <WorflowOption
                 icon={<DocumentScoreIcon className="workflow-icon"/>}
                 workflowType="ScoreDocuments"
+                data-testid="workflow-score-documents-option"
             />
         </div>
     );

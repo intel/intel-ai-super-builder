@@ -128,6 +128,7 @@ const DownloadBody = ({
                   size="large"
                   checked={isChecked}
                   onChange={(e) => setIsChecked(e.target.checked)}
+                  data-testid="model-download-consent-checkbox"
                 />{" "}
                 {/* Added checkbox */}
                 <p className="consent-confirm-text">
@@ -140,6 +141,7 @@ const DownloadBody = ({
                   variant="contained"
                   onClick={handleConfirm}
                   disabled={!isChecked} // Disable button until checkbox is checked
+                  data-testid="model-download-proceed-button"
                 >
                   <p>{t("model_downloader.body.button_proceed")}</p>
                 </Button>
@@ -147,6 +149,7 @@ const DownloadBody = ({
                   className="consent-button-option"
                   variant="text"
                   onClick={handleCancel}
+                  data-testid="model-download-cancel-button"
                 >
                   <p>{t("model_downloader.body.button_cancel")}</p>
                 </Button>
@@ -240,7 +243,7 @@ const DownloadBody = ({
             <div className="setup-complete-button-group">
               {downloadStatus === "All downloads complete" ||
               downloadStatus === "Nothing to download!" ? (
-                <Button size="m" variant="contained" onClick={handleClose}>
+                <Button size="m" variant="contained" onClick={handleClose} data-testid="model-download-complete-button">
                   <CheckCircleOutlineIcon
                     sx={{ fontSize: 18, verticalAlign: "middle", mr: 1 }}
                   />
@@ -253,6 +256,7 @@ const DownloadBody = ({
                     size="m"
                     variant="outlined"
                     onClick={handleClose}
+                    data-testid="model-download-failed-close-button"
                   >
                     <CancelOutlinedIcon
                       sx={{ fontSize: 18, verticalAlign: "middle", mr: 1 }}
@@ -269,6 +273,7 @@ const DownloadBody = ({
                           "https://github.com/intel/intel-ai-assistant-builder?tab=readme-ov-file#tips-troubleshooting-known-issues"
                         );
                       }}
+                      data-testid="model-download-troubleshooting-link"
                     >
                       {t("model_downloader.body.troubleshooting_link")}
                     </Link>

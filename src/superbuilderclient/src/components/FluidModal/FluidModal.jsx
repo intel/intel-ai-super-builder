@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Modal, Box, Button, Typography } from "@mui/material";
 import "./FluidModal.css";
 import AssistantLogo from "../assistantLogo/assistantLogo";
@@ -12,6 +12,7 @@ const FluidModal = ({
   assistant,
   footer,
   width = "80%",
+  'data-testid': dataTestId,
 }) => {
   const { t } = useTranslation();
   return (
@@ -20,6 +21,7 @@ const FluidModal = ({
       onClose={handleClose}
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
+      data-testid={dataTestId}
     >
       <Box className="modal-box" sx={{ width: width }}>
         <div className="modal-header">
@@ -45,6 +47,7 @@ const FluidModal = ({
               className="close-fluid-button"
               variant="contained"
               sx={{ borderRadius: "0px" }}
+              data-testid={dataTestId + "-close-button"}
             >
               {t("fluidmodel.close_button")}
             </Button>

@@ -204,7 +204,7 @@ const ModelConversion = () => {
           }
         }
       }
-      const success = await convertModel(isWindowsPath);
+      const success = await convertModel(isWindowsPath, tokenId);
       console.log("Model conversion success:", success);
       if (success) {
         const uploadSuccess = await uploadModel(selectedModelType);
@@ -309,12 +309,14 @@ const ModelConversion = () => {
           <IconButton
             className="window-control"
             onClick={minimizeWindow}
+            data-testid="model-conversion-window-minimize-button"
           >
             <MinimizeIcon fontSize="small" />
           </IconButton>
           <IconButton
             className="window-control"
             onClick={toggleMaximizeWindow}
+            data-testid="model-conversion-window-maximize-button"
           >
             {isMaximized ? <CloseFullscreenIcon fontSize="small" /> : <OpenInFullIcon fontSize="small" />}
           </IconButton>
@@ -322,6 +324,7 @@ const ModelConversion = () => {
             className="window-control"
             id="close"
             onClick={handleClose}
+            data-testid="model-conversion-window-close-button"
           >
             <CloseIcon fontSize="small" />
           </IconButton>
@@ -363,6 +366,7 @@ const ModelConversion = () => {
               !status.includes("uploaded") &&
               !status.includes("Error")
             }
+            data-testid="model-conversion-input-field"
           />
         </div>
         <div className="textfield-label-container">
@@ -384,6 +388,7 @@ const ModelConversion = () => {
               !status.includes("uploaded") &&
               !status.includes("Error")
             }
+            data-testid="model-conversion-token-input-field"
           />
         </div>
         <div className="textfield-label-container">
@@ -431,6 +436,7 @@ const ModelConversion = () => {
               !status.includes("uploaded") &&
               !status.includes("Error")
             }
+            data-testid="model-conversion-parameters-input-field"
           />
         </div>
         {status !== "" && (
@@ -471,6 +477,7 @@ const ModelConversion = () => {
                     />
                   }
                   label={t("setting.models.conversion.chat")}
+                  data-testid="model-conversion-chat-model-radio"
                 />
                 <FormControlLabel
                   value="embedding_model"
@@ -481,6 +488,7 @@ const ModelConversion = () => {
                     />
                   }
                   label={t("setting.models.conversion.embedder")}
+                  data-testid="model-conversion-embedding-model-radio"
                 />
                 <FormControlLabel
                   value="ranker_model"
@@ -491,6 +499,7 @@ const ModelConversion = () => {
                     />
                   }
                   label={t("setting.models.conversion.reranker")}
+                  data-testid="model-conversion-ranker-model-radio"
                 />
               </RadioGroup>
             </div>
@@ -511,6 +520,7 @@ const ModelConversion = () => {
                 onChange={(e) => setConsentGiven(e.target.checked)}
               />
             }
+            data-testid="model-conversion-consent-checkbox"
           />
         )}
         <Button
@@ -519,6 +529,7 @@ const ModelConversion = () => {
           disabled={status !== "" || (consentNeeded && !consentGiven)}
           onClick={handleEnabler}
           sx={{ display: "flex", width: "75%", textTransform: "none" }}
+          data-testid="model-convert-button"
         >
           {t("setting.models.conversion.convert_button")}
         </Button>
@@ -543,6 +554,7 @@ const ModelConversion = () => {
           color="primary"
           onClick={() => appWindow.close()}
           sx={{ width: "50%", textTransform: "none" }}
+          data-testid="model-conversion-close-window-button"
         >
           {t("setting.models.conversion.close_button")}
         </Button>
@@ -552,6 +564,7 @@ const ModelConversion = () => {
           disabled={!status.includes("uploaded") || selectedModelType === ""}
           onClick={handleActivateModel}
           sx={{ width: "50%", textTransform: "none" }}
+          data-testid="model-conversion-activate-model-button"
         >
           {t("setting.models.conversion.active_button")}
         </Button>

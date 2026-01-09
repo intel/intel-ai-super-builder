@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "IntelAIA",
-  "version": "2.2.0",
+  "version": "2.7.0",
   "identifier": "com.intelaia.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,11 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "Intel(R) AI Assistant Builder",
+        "title": "Intel(R) AI Super Builder",
         "width": 1280,
         "height": 720,
         "minWidth": 600,
-        "minHeight": 720,
+        "minHeight": 550,
         "decorations": false
       }
     ],

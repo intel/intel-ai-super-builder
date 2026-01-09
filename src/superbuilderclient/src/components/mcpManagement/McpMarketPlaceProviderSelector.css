@@ -1,0 +1,19 @@
+.marketplace-provider-selector {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.provider-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+.provider-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+  vertical-align: middle;
+}

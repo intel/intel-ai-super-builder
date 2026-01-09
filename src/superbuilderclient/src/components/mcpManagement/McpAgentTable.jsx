@@ -6,12 +6,12 @@ import { useTranslation } from "react-i18next";
 import "./McpServerTable.css";
 import useMcpStore from "../../stores/McpStore";
 import { ChatContext } from "../context/ChatContext";
-import { 
-  MCP_TABLE_STYLES, 
-  createTextColumn, 
-  generateUniqueRows, 
+import {
+  MCP_TABLE_STYLES,
+  createTextColumn,
+  generateUniqueRows,
   MCP_DATAGRID_PROPS,
-  createActionButton 
+  createActionButton,
 } from "./mcpTableShared";
 
 export default function McpAgentTable({ layoutMode = "vertical" }) {
@@ -24,8 +24,8 @@ export default function McpAgentTable({ layoutMode = "vertical" }) {
   const { isChatReady, setIsChatReady } = useContext(ChatContext);
 
   // Use shared utility to generate unique rows
-  const mcpAgents = React.useMemo(() => 
-    generateUniqueRows(rawMcpAgents, 'name'), 
+  const mcpAgents = React.useMemo(
+    () => generateUniqueRows(rawMcpAgents, "name"),
     [rawMcpAgents]
   );
 
@@ -37,14 +37,32 @@ export default function McpAgentTable({ layoutMode = "vertical" }) {
     minWidth: 150,
     renderCell: (params) => {
       if (!params.value || !Array.isArray(params.value)) {
-        return <Box sx={MCP_TABLE_STYLES.cellText}>{''}</Box>;
+        return <Box sx={MCP_TABLE_STYLES.cellText}>{""}</Box>;
       }
-      const names = params.value
+
+      // Filter out server IDs that no longer exist
+      const validServerNames = params.value
         .map((id) => {
           const server = mcpServers.find((s) => s.id === id);
-          return server ? server.server_name : id;
+          return server ? server.server_name : null;
         })
-        .join(", ");
+        .filter((name) => name !== null);
+
+      if (validServerNames.length === 0) {
+        return (
+          <Box
+            sx={{
+              ...MCP_TABLE_STYLES.cellText,
+              color: "#999",
+              fontStyle: "italic",
+            }}
+          >
+            {t("mcp.agent_table.no_mcpserver")}
+          </Box>
+        );
+      }
+
+      const names = validServerNames.join(", ");
       return <Box sx={MCP_TABLE_STYLES.cellText}>{names}</Box>;
     },
   });
@@ -60,36 +78,35 @@ export default function McpAgentTable({ layoutMode = "vertical" }) {
     renderCell: (params) => {
       const isRunning = runningMcpAgents.includes(params.row.name);
       const isLoading = loadingMcpAgents.includes(params.row.name);
-      
+
       return (
         <Box sx={MCP_TABLE_STYLES.actionsContainer}>
-          {isRunning ? (
-            createActionButton(
-              t("mcp.server_table.stop"),
-              "mcp-table-status-btn status-btn-stop",
-              !isChatReady,
-              () => handleStopMcpAgent(params.row.name),
-              isLoading,
-              t("mcp.server_table.stopping")
-            )
-          ) : (
-            createActionButton(
-              t("mcp.server_table.start"),
-              "mcp-table-status-btn status-btn-start",
-              !isChatReady || (params.row.server_ids && params.row.server_ids.length === 0),
-              () => handleStartMcpAgent(params.row.name),
-              isLoading,
-              t("mcp.server_table.starting")
-            )
-          )}
-          
+          {isRunning
+            ? createActionButton(
+                t("mcp.server_table.stop"),
+                "mcp-table-status-btn status-btn-stop",
+                !isChatReady,
+                () => handleStopMcpAgent(params.row.name),
+                isLoading,
+                t("mcp.server_table.stopping")
+              )
+            : createActionButton(
+                t("mcp.server_table.start"),
+                "mcp-table-status-btn status-btn-start",
+                !isChatReady ||
+                  (params.row.server_ids && params.row.server_ids.length === 0),
+                () => handleStartMcpAgent(params.row.name),
+                isLoading,
+                t("mcp.server_table.starting")
+              )}
+
           {createActionButton(
             t("mcp.server_table.edit"),
             "mcp-table-status-btn",
             !isChatReady || isRunning,
             () => handleDetailsClick(params.row.id)
           )}
-          
+
           {createActionButton(
             t("mcp.agent_table.remove"),
             "mcp-table-status-btn status-btn-remove",
@@ -110,7 +127,7 @@ export default function McpAgentTable({ layoutMode = "vertical" }) {
       agentName: selectedAgent.name || "",
       description: selectedAgent.desc || "",
       systemMessage: selectedAgent.message || "",
-      mcpServerIds: selectedAgent.server_ids || "",
+      mcpServerIds: selectedAgent.server_ids || []
     });
   };
 
@@ -135,16 +152,25 @@ export default function McpAgentTable({ layoutMode = "vertical" }) {
     setIsChatReady(true);
   };
 
-  const commandColumns = React.useMemo(() => [
-    createTextColumn("name", t("mcp.agent_table.agent_name"), 0.5, 120),
-    createTextColumn("desc", t("mcp.agent_table.agent_description"), 1, 150),
-    createTextColumn("message", t("mcp.agent_table.system_prompt"), 1, 200),
-    createServerIdsColumn(),
-    createActionsColumn(),
-  ], [t, mcpServers, runningMcpAgents, loadingMcpAgents, isChatReady]);
+  const commandColumns = React.useMemo(
+    () => [
+      createTextColumn("name", t("mcp.agent_table.agent_name"), 0.5, 120),
+      createTextColumn("desc", t("mcp.agent_table.agent_description"), 1, 150),
+      createTextColumn("message", t("mcp.agent_table.system_prompt"), 1, 200),
+      createServerIdsColumn(),
+      createActionsColumn(),
+    ],
+    [t, mcpServers, runningMcpAgents, loadingMcpAgents, isChatReady]
+  );
 
-  const paperStyle = layoutMode === "horizontal" ? MCP_TABLE_STYLES.paperHorizontal : MCP_TABLE_STYLES.paper;
-  const dataGridStyle = layoutMode === "horizontal" ? MCP_TABLE_STYLES.dataGridHorizontal : MCP_TABLE_STYLES.dataGrid;
+  const paperStyle =
+    layoutMode === "horizontal"
+      ? MCP_TABLE_STYLES.paperHorizontal
+      : MCP_TABLE_STYLES.paper;
+  const dataGridStyle =
+    layoutMode === "horizontal"
+      ? MCP_TABLE_STYLES.dataGridHorizontal
+      : MCP_TABLE_STYLES.dataGrid;
 
   return (
     <Box sx={MCP_TABLE_STYLES.container}>

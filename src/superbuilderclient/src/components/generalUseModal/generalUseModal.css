@@ -48,7 +48,6 @@
 }
 
 .info-logo {
-    background-color: var(--logo-container-background-color);
     width: 60px !important;
     height: 60px !important;
 }

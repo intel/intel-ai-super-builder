@@ -1,4 +1,4 @@
-﻿import "./Topbar.css";
+import "./Topbar.css";
 import React, { useEffect, useState, useContext } from "react";
 import { getAllWindows, getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -51,7 +51,7 @@ const Topbar = ({ children }) => {
   const openOSSFolder = async () => {
     try {
       let folderPath =
-        "C:\\Program Files\\Intel Corporation\\Intel(R) AI Assistant Builder\\oss_info";
+        "C:\\Program Files\\Intel Corporation\\Intel(R) AI Super Builder\\oss_info";
       const pathExists = await exists(folderPath);
       if (!pathExists) {
         console.error("Path does not exist:", folderPath);
@@ -125,6 +125,7 @@ const Topbar = ({ children }) => {
       id="app-topbar"
       data-tauri-drag-region
       className="top-bar-container"
+      data-testid="topbar-container"
       style={{
         "--topbar-container-background-color": assistant.header_bg_color,
       }}
@@ -150,6 +151,7 @@ const Topbar = ({ children }) => {
             size="small"
             onClick={toggleInfo}
             sx={{ color: assistant.header_text_bg_color }}
+            data-testid="topbar-info-button"
           >
             <HelpIcon fontSize="small" />
           </IconButton>
@@ -160,6 +162,7 @@ const Topbar = ({ children }) => {
             header={`${t("topbar.title")} - ${assistantName}`}
             hideFooter={false}
             buttonName={t("topbar.content_part_10")}
+            data-testid="topbar-info-modal"
           >
             <div>
               <div>
@@ -229,6 +232,7 @@ const Topbar = ({ children }) => {
                   component="button"
                   variant="body1"
                   onClick={openBugReport}
+                  data-testid="topbar-report-bug-button"
                 >
                   <BugReportIcon sx={{ pr: 1 }} />
                   {/*TODO: Translate*/}
@@ -239,6 +243,7 @@ const Topbar = ({ children }) => {
                   component="button"
                   variant="body1"
                   onClick={openHelpGuide}
+                  data-testid="topbar-help-guide-button"
                 >
                   <HelpGuideIcon sx={{ pr: 1 }} />
                   {/*TODO: Translate*/}
@@ -249,6 +254,7 @@ const Topbar = ({ children }) => {
                   component="button"
                   variant="body1"
                   onClick={openOSSFolder}
+                  data-testid="topbar-license-info-button"
                 >
                   <LicenseInfoIcon sx={{ pr: 1 }} />
                   {t("topbar.content_part_9")}
@@ -276,6 +282,7 @@ const Topbar = ({ children }) => {
               color: assistant.header_text_bg_color,
             },
           }}
+          data-testid="topbar-minimize-button"
         >
           <MinimizeIcon fontSize="small" />
         </IconButton>
@@ -290,6 +297,7 @@ const Topbar = ({ children }) => {
               color: assistant.header_text_bg_color,
             },
           }}
+          data-testid="topbar-maximize-button"
         >
           {isMaximized ? (
             <CloseFullscreenIcon fontSize="small" />
@@ -308,6 +316,7 @@ const Topbar = ({ children }) => {
               color: assistant.header_text_bg_color,
             },
           }}
+          data-testid="topbar-close-button"
         >
           <CloseIcon fontSize="small" />
         </IconButton>

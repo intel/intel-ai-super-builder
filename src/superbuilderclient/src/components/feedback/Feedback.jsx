@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import "./Feedback.css";
 import { invoke } from "@tauri-apps/api/core";
 import { ChatContext } from "../context/ChatContext";
@@ -19,7 +19,7 @@ const FeedbackRow = ({ question, message, messageIndex, resubmitQuestion, enable
     { alt: "/path/to/logo5.png", function: "feedback-copy" },
   ];
   if (enableSendFeedback) {
-    logos = [
+    logos = [ 
       { alt: "/path/to/logo1.png", function: "feedback-thumbs-up" },
       { alt: "/path/to/logo2.png", function: "feedback-thumbs-down" },
       { alt: "/path/to/logo3.png", function: "feedback-divider" },
@@ -204,6 +204,7 @@ const FeedbackRow = ({ question, message, messageIndex, resubmitQuestion, enable
                   alt={logo.alt}
                   onClick={() => handleButtonClick(logo.function)} // Add the onClick event handler
                   disabled={!isChatReady}
+                  data-testid={`feedback-${logo.function.replace('feedback-', '')}-button`}
                 />
               }
             </div>
@@ -225,6 +226,7 @@ const FeedbackRow = ({ question, message, messageIndex, resubmitQuestion, enable
               onKeyDown={handleKeyDown}
               onChange={(e) => setInput(e.target.value)}
               className="enter-your-feedback"
+              data-testid="feedback-input-field"
             />
 
             <button
@@ -232,6 +234,7 @@ const FeedbackRow = ({ question, message, messageIndex, resubmitQuestion, enable
               className={`feedback-send-button ${
                 upSelected ? "up" : downSelected ? "down" : ""
               }`}
+              data-testid="feedback-send-input-button"
             />
           </div>
         )}

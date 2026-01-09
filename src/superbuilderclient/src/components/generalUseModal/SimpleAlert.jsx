@@ -33,10 +33,10 @@ const SimpleAlert = ({
             </DialogContentText>
         </DialogContent>
         <DialogActions className="simple-alert-options">
-            <Button onClick={onConfirm} autoFocus variant="contained">
+            <Button onClick={onConfirm} autoFocus variant="contained" data-testid="dialog-model-switch-confirm-button">
                 {confirmText}
             </Button>
-            <Button onClick={onDeny}>
+            <Button onClick={onDeny} data-testid="dialog-model-switch-skip-button">
                 {denyText}
             </Button>
         </DialogActions>

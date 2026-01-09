@@ -1,4 +1,4 @@
-﻿import { createContext, useState } from "react";
+import { createContext, useState } from "react";
 import DOMPurify from "dompurify";
 
 import useDataStore from "../../stores/DataStore";

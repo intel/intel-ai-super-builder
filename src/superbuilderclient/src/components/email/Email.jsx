@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Email.css";
 import { Button, Icon, IconButton, TextField, Stack } from "@mui/material";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -72,16 +72,16 @@ const Email = () => {
 
   const setBugReport = () => {
     const mail_to = "support.aibuilder@intel.com";
-    const mail_subject = "Intel AI Assistant Builder - Issue Report";
+    const mail_subject = "Intel AI Super Builder - Issue Report";
     const mail_body = `We apologize for any inconvenience you have experienced with our product. To assist us in debugging the issue, please provide the following information if possible:
-    \n1. Please provide a short description of the issue:
+    \n1. Please provide a short description of the issue: 
     \n2. What is your CPU info, memory size and GPU info?
     \n3. How to reproduce this issue?
-    \n4. Who should we contact about this issue?
-    \n5. Can you provide more details about the error?
-    \n You can find Intel(R) AI Assistant application logs under C:\\temp\\IntelAia\\**datetime**_service.log. If you can share the error information from the log, it will help us troubleshoot the issue.
+    \n4. Who should we contact about this issue?    
+    \n5. Can you provide more details about the error? 
+    \n You can find Intel(R) AI Assistant application logs under C:\\temp\\IntelAia\\**datetime**_service.log. If you can share the error information from the log, it will help us troubleshoot the issue.   
     \n\nThank you!
-    \n Intel(R) AI Assistant Builder Team`;
+    \n Intel(R) AI Super Builder Team`;
 
     setRecipient(mail_to);
     setSubject(mail_subject);
@@ -103,7 +103,7 @@ const Email = () => {
   const parseSubject = async (question) => {
     let maxLength = question.length;
     maxLength = 50;
-    let subjectPreamble = "Intel AI Assistant Builder Chat - ";
+    let subjectPreamble = "Intel AI Super Builder Chat - ";
     try {
       let subjectQuestion = question.substring(0, maxLength - 1) + "...";
 
@@ -192,6 +192,7 @@ const Email = () => {
             className="window-control"
             id="min"
             onClick={() => appWindow.minimize()}
+            data-testid="email-minimize-window-button"
           >
             <MinimizeIcon fontSize="small" />
           </IconButton>
@@ -199,6 +200,7 @@ const Email = () => {
             className="window-control"
             id="max"
             onClick={() => appWindow.toggleMaximize()}
+            data-testid="email-maximize-window-button"
           >
             {isMaximized ? (
               <CloseFullscreenIcon fontSize="small" />
@@ -210,6 +212,7 @@ const Email = () => {
             className="window-control"
             id="close"
             onClick={() => handleClose()}
+            data-testid="email-close-window-button"
           >
             <CloseIcon fontSize="small" />
           </IconButton>
@@ -227,6 +230,7 @@ const Email = () => {
             id="text-area-1"
             value={subject || ""}
             onChange={onSubjectChange}
+            data-testid="email-subject-input-textfield"
           />
           <label htmlFor="text-area-1">
             <b>{t("email.message")}</b>
@@ -240,6 +244,7 @@ const Email = () => {
             rows={10}
             value={message || ""}
             onChange={onMessageChange}
+            data-testid="email-message-input-textfield"
           />
 
           <h3>{t("email.note")}</h3>
@@ -251,6 +256,7 @@ const Email = () => {
               isButtonDisabled ? "disabled-button" : ""
             }`}
             onClick={generateMailtoLink}
+            data-testid="email-send-button"
           >
             {t("email.button")}
           </Button>

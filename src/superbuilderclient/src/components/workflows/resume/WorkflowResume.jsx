@@ -38,6 +38,7 @@ const WorkflowResume = ({loading, invoke}) => {
                     attachedFilesVisible && (
                         <div className="workflow-horizontal-input">
                             <WorkflowInput
+                                data-testid="resume-job-description-input"
                                 label="Enter job description"
                                 value={jobDescription}
                                 setValue={setJobDescription}
@@ -45,6 +46,7 @@ const WorkflowResume = ({loading, invoke}) => {
                                 onEnterKeyDown={submitJobDescription} // try to submit if enter key pressed
                             />
                             <WorkflowButton
+                                data-testid="resume-evaluate-button"
                                 onClick={submitJobDescription}
                                 disabled={loading || (jobDescription === "") || (attachedFiles.length <= 0)}
                                 text={"Evaluate"}

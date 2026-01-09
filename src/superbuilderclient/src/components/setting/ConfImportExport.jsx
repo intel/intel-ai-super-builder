@@ -1,4 +1,4 @@
-﻿import React, { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
   Button,
@@ -89,6 +89,7 @@ const ConfImportExport = () => {
             fullWidth
             onClick={handleImport}
             disabled={!isChatReady}
+            data-testid="config-import-button"
           >
             {t("setting.confimportexport.button.import")}
           </Button>
@@ -97,13 +98,14 @@ const ConfImportExport = () => {
             fullWidth
             onClick={handleExport}
             disabled={!isChatReady}
+            data-testid="config-export-button"
           >
             {t("setting.confimportexport.button.export")}
           </Button>
         </Card>
       </SimpleAccordion>
 
-      <Dialog open={exportDialog} onClose={() => setExportDialog(false)}>
+      <Dialog open={exportDialog} onClose={() => setExportDialog(false)} data-testid="export-success-dialog">
         <DialogTitle
           sx={{ backgroundColor: config.ActiveAssistant.sidebar_box_bg_color }}
         >
@@ -122,6 +124,7 @@ const ConfImportExport = () => {
             fullWidth
             onClick={() => setExportDialog(false)}
             sx={{ borderRadius: "0px" }}
+            data-testid="export-success-close-button"
           >
             {t("setting.confimportexport.info.ok")}
           </Button>

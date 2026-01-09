@@ -1,7 +1,7 @@
 [package]
 name = "IntelAIA"
-version = "2.2.0"
-description = "Intel(R) AI Assistant Builder"
+version = "2.7.0"
+description = "Intel(R) AI Super Builder"
 authors = ["Intel Corp"]
 edition = "2021"
 license = "MIT"
@@ -46,11 +46,11 @@ tonic = "0.12"
 # If you encounter missing async functionality, consider adding the required tokio features here.
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "sync", "time", "net", "io-util"] }
 prost = "0.13"
-
-#email
 lazy_static = "1.5.0"
-winreg = "0.53.0"
-outlook-exe = "0.1.0"
+
+[features]
+default = []
+mock-backend = []
 
 [target."cfg(target_os = \"windows\")".dependencies]
 # Version needs to match tauri's
@@ -59,6 +59,9 @@ windows = { version = "0.39.0", features = [
   "Win32_Graphics_Dwm",
   "Win32_UI_Controls"
 ] }
+# Email functionality (Windows-only)
+winreg = "0.53.0"
+outlook-exe = "0.1.0"
 
 # Profile optimizations for faster development builds
 [profile.dev]

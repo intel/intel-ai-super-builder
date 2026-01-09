@@ -35,6 +35,7 @@ const StatusNotification = () => {
 
   return (
     <Snackbar
+      data-testid="status-notification-snackbar"
       open={!!notification}
       autoHideDuration={null}
       onClose={handleClose}

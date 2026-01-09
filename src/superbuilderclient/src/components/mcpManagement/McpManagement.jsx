@@ -8,29 +8,29 @@ import {
   FormControl,
   Typography,
   TextField,
-  ToggleButtonGroup,
-  ToggleButton,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import ArrowCircleLeft from "@mui/icons-material/ArrowCircleLeft";
-import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
-import ViewColumnIcon from "@mui/icons-material/ViewColumn";
+import McpMarketplaceIcon from "@mui/icons-material/LocalMall";
 import Autocomplete from "@mui/material/Autocomplete";
 import "./McpManagement.css";
 import McpAgentTable from "./McpAgentTable";
 import McpServerTable from "./McpServerTable";
+import McpToolsDialog from "./McpToolsDialog";
 import FluidModal from "../FluidModal/FluidModal";
 import useDataStore from "../../stores/DataStore";
 import useMcpStore from "../../stores/McpStore";
 import { useTranslation } from "react-i18next";
 import { ChatContext } from "../context/ChatContext";
 import { McpTableHeader } from "./mcpTableShared";
+import McpServerInfo from "./McpServerInfo";
 
-const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
+const McpManagement = ({ isSidebarOpen = false, closePanels = () => { } }) => {
   const { t } = useTranslation();
   const { isChatReady, setIsChatReady } = useContext(ChatContext);
   const assistant = useDataStore((state) => state.assistant);
-  
+
   const mcpManagementOpen = useMcpStore((state) => state.mcpManagementOpen);
   const mcpAgents = useMcpStore((state) => state.mcpAgents);
   const mcpServers = useMcpStore((state) => state.mcpServers);
@@ -54,15 +54,13 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
 
   const [mcpInputError, setMcpServerInputError] = useState({});
   const [mcpAgentInputError, setMcpAgentInputError] = useState({});
-  const [layoutMode, setLayoutMode] = useState("vertical"); // "vertical" or "horizontal"
   const [verticalSplitPercent, setVerticalSplitPercent] = useState(null); // null = not yet calculated
-  const [horizontalSplitPercent, setHorizontalSplitPercent] = useState(50); // 50% default for horizontal
   const [isResizing, setIsResizing] = useState(false);
-  const [hasCalculatedInitialSplit, setHasCalculatedInitialSplit] = useState(false); // Track if we've done initial calculation with data
+  const [hasCalculatedInitialSplit, setHasCalculatedInitialSplit] =
+    useState(false); // Track if we've done initial calculation with data
   const [isLoadingData, setIsLoadingData] = useState(false); // Track if initial data is being loaded
   const runningMcpAgents = useMcpStore((state) => state.runningMcpAgents);
   const loadingMcpAgents = useMcpStore((state) => state.loadingMcpAgents);
-
   const refreshTrigger = useMcpStore((state) => state.refreshTrigger);
 
   const DEBUG_LAYOUT = false;
@@ -81,92 +79,148 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
       const RESIZE_HANDLE_HEIGHT = 6; // Resize handle height
       const GAP_HEIGHT = 12; // Gap between tables (combined with resize handle)
       const MARGIN_BOTTOM = 8; // Margin bottom of table container
-      
+
       // App layout constants
       const APP_TITLE_BAR = 48; // App title bar height
       const PAGE_TOP_SECTION = 36; // Back button and toggle section (marginBottom: 8px)
       const PADDING = 20; // Container padding
-      
+
       // Calculate Agent table minimum height
       // Using pageSize from pagination (default 10 rows)
       const defaultPageSize = 10;
-      const numVisibleRows = mcpAgents.length === 0 ? 1 : Math.min(defaultPageSize, mcpAgents.length);
-      const numVisibleServerRows = mcpServers.length === 0 ? 1 : Math.min(defaultPageSize, mcpServers.length);
-      
-      const agentTableMinHeight = 
-        TABLE_HEADER_HEIGHT + 
-        HEADER_HEIGHT + 
-        numVisibleRows * ROW_HEIGHT + 
-        FOOTER_HEIGHT + 
+      const numVisibleRows =
+        mcpAgents.length === 0
+          ? 1
+          : Math.min(defaultPageSize, mcpAgents.length);
+      const numVisibleServerRows =
+        mcpServers.length === 0
+          ? 1
+          : Math.min(defaultPageSize, mcpServers.length);
+
+      const agentTableMinHeight =
+        TABLE_HEADER_HEIGHT +
+        HEADER_HEIGHT +
+        numVisibleRows * ROW_HEIGHT +
+        FOOTER_HEIGHT +
         MARGIN_BOTTOM;
-      
+
       // Calculate available container height from window height
       const windowHeight = window.innerHeight;
-      const totalOverhead = APP_TITLE_BAR + PAGE_TOP_SECTION + PADDING + GAP_HEIGHT + RESIZE_HANDLE_HEIGHT;
+      const totalOverhead =
+        APP_TITLE_BAR +
+        PAGE_TOP_SECTION +
+        PADDING +
+        GAP_HEIGHT +
+        RESIZE_HANDLE_HEIGHT;
       const availableHeight = windowHeight - totalOverhead;
-      
+
       // Calculate percentage (agent table height / total available height)
       let calculatedPercent = (agentTableMinHeight / availableHeight) * 100;
-      
+
       // Ensure both tables have enough space (min 200px each for DataGrid to function properly)
       const minTableHeight = 200;
       const minPercent = (minTableHeight / availableHeight) * 100;
       const maxPercent = 100 - minPercent;
-      
-      calculatedPercent = Math.max(minPercent, Math.min(maxPercent, calculatedPercent));
-      
-      const agentTableActualHeight = availableHeight * calculatedPercent / 100;
-      const serverTableActualHeight = availableHeight * (100 - calculatedPercent) / 100;
-      
+
+      calculatedPercent = Math.max(
+        minPercent,
+        Math.min(maxPercent, calculatedPercent)
+      );
+
+      const agentTableActualHeight =
+        (availableHeight * calculatedPercent) / 100;
+      const serverTableActualHeight =
+        (availableHeight * (100 - calculatedPercent)) / 100;
+
       if (DEBUG_LAYOUT) {
-        console.log('=== Vertical Layout Height Calculation ===');
-        console.log('Window height:', windowHeight);
-        console.log('App overhead:', totalOverhead);
-        console.log('Available height:', availableHeight);
-        console.log('Agent data rows:', mcpAgents.length, '(allocating space for', numVisibleRows, 'rows)');
-        console.log('Server data rows:', mcpServers.length, '(allocating space for', numVisibleServerRows, 'rows)');
-        console.log('Agent table min height needed:', agentTableMinHeight + 'px');
-        console.log('Calculated percent:', calculatedPercent.toFixed(2) + '%');
-        console.log('Agent table actual height:', agentTableActualHeight.toFixed(0) + 'px');
-        console.log('Server table actual height:', serverTableActualHeight.toFixed(0) + 'px');
-        console.log('Min table height enforced:', minTableHeight + 'px');
+        console.log("=== Vertical Layout Height Calculation ===");
+        console.log("Window height:", windowHeight);
+        console.log("App overhead:", totalOverhead);
+        console.log("Available height:", availableHeight);
+        console.log(
+          "Agent data rows:",
+          mcpAgents.length,
+          "(allocating space for",
+          numVisibleRows,
+          "rows)"
+        );
+        console.log(
+          "Server data rows:",
+          mcpServers.length,
+          "(allocating space for",
+          numVisibleServerRows,
+          "rows)"
+        );
+        console.log(
+          "Agent table min height needed:",
+          agentTableMinHeight + "px"
+        );
+        console.log("Calculated percent:", calculatedPercent.toFixed(2) + "%");
+        console.log(
+          "Agent table actual height:",
+          agentTableActualHeight.toFixed(0) + "px"
+        );
+        console.log(
+          "Server table actual height:",
+          serverTableActualHeight.toFixed(0) + "px"
+        );
+        console.log("Min table height enforced:", minTableHeight + "px");
       }
-      
+
       setVerticalSplitPercent(calculatedPercent);
       setHasCalculatedInitialSplit(true); // Mark that we've done the initial calculation
     }
-  }, [mcpAgents, mcpServers, hasCalculatedInitialSplit, mcpManagementOpen, refreshTrigger]);
+  }, [
+    mcpAgents,
+    mcpServers,
+    hasCalculatedInitialSplit,
+    mcpManagementOpen,
+    refreshTrigger,
+  ]);
 
   // Helper function to create table container styles
   const createTableContainerStyle = (verticalCalcOffset) => ({
-    height: layoutMode === "horizontal" 
-      ? "85%"
-      : `calc(100% - ${verticalCalcOffset}px)`, 
-    minHeight: "200px", // Minimum height for DataGrid to function
-    overflow: "auto", 
-    marginBottom: layoutMode === "horizontal" ? "8px" : "0"
+    height: `calc(100% - ${verticalCalcOffset}px)`,
+    minHeight: "100px", // Minimum height for DataGrid to function
+    overflow: "auto",
+    marginBottom: "0",
   });
 
   useEffect(() => {
     if (mcpManagementOpen) {
+      const forceRefresh = refreshTrigger > 0;
+
       // Reset calculation flag when refreshing data
-      setHasCalculatedInitialSplit(false);
-      setVerticalSplitPercent(null);
+      if (forceRefresh) {
+        setHasCalculatedInitialSplit(false);
+        setVerticalSplitPercent(null);
+      }
+
+      // Check if we already have data in the store
+      const hasData = mcpAgents.length > 0 || mcpServers.length > 0;
+
       setIsLoadingData(true);
-      
       // Load data asynchronously
       // When getMcpAgent() and getLocalMcpServers() complete, they update the store
       // which will trigger the calculation useEffect below (since mcpAgents/mcpServers are dependencies)
       const loadData = async () => {
-        await Promise.all([
-          useMcpStore.getState().getMcpAgent(),
-          useMcpStore.getState().getActiveMcpAgents(),
-          useMcpStore.getState().getLocalMcpServers(),
-          useMcpStore.getState().getActiveMcpServers()
-        ]);
-        setIsLoadingData(false);
+        try {
+          if (!hasData || forceRefresh) {
+            setIsLoadingData(true);
+          }
+          await Promise.all([
+            useMcpStore.getState().getMcpAgent(forceRefresh),
+            useMcpStore.getState().getActiveMcpAgents(),
+            useMcpStore.getState().getLocalMcpServers(forceRefresh),
+            useMcpStore.getState().getActiveMcpServers(),
+          ]);
+        } catch (err) {
+          console.log("Error loading MCP management data:", err);
+        } finally {
+          setIsLoadingData(false);
+        }
       };
-      
+
       loadData();
     }
   }, [mcpManagementOpen, refreshTrigger]);
@@ -205,42 +259,26 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
 
   React.useEffect(() => {
     const handleMouseMove = (e) => {
-      if (layoutMode === "horizontal") {
-        const container = document.querySelector('.tables-container.horizontal');
-        if (!container) return;
+      const container = document.querySelector(".tables-container.vertical");
+      if (!container) return;
 
-        const containerRect = container.getBoundingClientRect();
-        const containerWidth = containerRect.width;
-        const mouseX = e.clientX - containerRect.left;
-        const newWidthPercent = (mouseX / containerWidth) * 100;
-        
-        // Calculate min width in percentage (300px minimum for each panel)
-        const minWidthPercent = (300 / containerWidth) * 100;
-        const maxWidthPercent = 100 - minWidthPercent;
-        
-        // Constrain between min and max to ensure both panels stay at least 300px
-        if (newWidthPercent >= minWidthPercent && newWidthPercent <= maxWidthPercent) {
-          setHorizontalSplitPercent(newWidthPercent);
-        }
-      } else if (layoutMode === "vertical") {
-        const container = document.querySelector('.tables-container.vertical');
-        if (!container) return;
+      const containerRect = container.getBoundingClientRect();
+      const containerHeight = containerRect.height;
+      const mouseY = e.clientY - containerRect.top;
+      const newHeightPercent = (mouseY / containerHeight) * 100;
 
-        const containerRect = container.getBoundingClientRect();
-        const containerHeight = containerRect.height;
-        const mouseY = e.clientY - containerRect.top;
-        const newHeightPercent = (mouseY / containerHeight) * 100;
-        
-        // Calculate min height in percentage (250px minimum for each panel, accounting for gap)
-        const gap = 12; // gap between panels in pixels
-        const minHeightPx = 250;
-        const minHeightPercent = ((minHeightPx + gap) / containerHeight) * 100;
-        const maxHeightPercent = 100 - minHeightPercent;
-        
-        // Constrain between min and max to ensure both panels stay at least 250px
-        if (newHeightPercent >= minHeightPercent && newHeightPercent <= maxHeightPercent) {
-          setVerticalSplitPercent(newHeightPercent);
-        }
+      // Calculate min height in percentage (250px minimum for each panel, accounting for gap)
+      const gap = 12; // gap between panels in pixels
+      const minHeightPx = 250;
+      const minHeightPercent = ((minHeightPx + gap) / containerHeight) * 100;
+      const maxHeightPercent = 100 - minHeightPercent;
+
+      // Constrain between min and max to ensure both panels stay at least 250px
+      if (
+        newHeightPercent >= minHeightPercent &&
+        newHeightPercent <= maxHeightPercent
+      ) {
+        setVerticalSplitPercent(newHeightPercent);
       }
     };
 
@@ -249,17 +287,19 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
     };
 
     if (isResizing) {
-      document.body.classList.add('resizing');
-      document.addEventListener('mousemove', handleMouseMove, { passive: false });
-      document.addEventListener('mouseup', handleMouseUp, { passive: false });
-      
+      document.body.classList.add("resizing");
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: false,
+      });
+      document.addEventListener("mouseup", handleMouseUp, { passive: false });
+
       return () => {
-        document.body.classList.remove('resizing');
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.classList.remove("resizing");
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isResizing, layoutMode]);
+  }, [isResizing]);
 
   const handleInputSourceChange = (source) => {
     useMcpStore.getState().setMcpInputSource(source);
@@ -321,13 +361,37 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         agentName: "",
         description: "",
         systemMessage:
-          "You are a helpful assistant who first analyzes the ultimate needs of the customer. Then, you select the appropriate tool or multiple tools based on the needs and solve them step by step until the user's ultimate needs are met.",
+          `You execute ONE assigned task in a workflow.
+
+          INPUTS:
+          - ORIGINAL QUESTION: Full user request (if provided - gives context)
+          - DEPENDENCY OUTPUTS: Results from prerequisite tasks (if provided - your input data)
+          - YOUR TASK: What you must do (ONLY this)
+
+          INPUT PATTERNS:
+          Pattern 1 (First step - no dependencies):
+          - You receive: ORIGINAL QUESTION + YOUR TASK
+          - Use ORIGINAL QUESTION to understand what data/action YOUR TASK needs
+
+          Pattern 2 (Later step - has dependencies):
+          - You receive: DEPENDENCY OUTPUTS + YOUR TASK
+          - Use DEPENDENCY OUTPUTS as your input data
+          - ORIGINAL QUESTION may not be provided (you don't need it)
+
+          RULES:
+          - Use tools as needed to complete YOUR TASK
+          - If you have ORIGINAL QUESTION: understand context, but execute only YOUR TASK
+          - If you have DEPENDENCY OUTPUTS: use them as input for YOUR TASK
+          - Do not solve beyond YOUR TASK scope
+          - Stop when YOUR TASK is done
+
+          OUTPUT: When complete, simply report your results and say nothing else.`,
         mcpServerIds: [], // Initialize as empty array
       });
     }
   };
 
-  const handleMcpServerSubmit = (type) => {
+  const handleMcpServerSubmit = async (type) => {
     setIsChatReady(false);
     // Validate input before submission
     if (!Object.values(mcpInputError).every((v) => v === false)) {
@@ -347,16 +411,24 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
     }
 
     let result;
-    if (type === "Add") {
-      result = useMcpStore.getState().addMcpServer();
-    } else {
-      result = useMcpStore.getState().updateMcpServer();
-    }
+    try {
+      if (type === "Add") {
+        result = await useMcpStore.getState().addMcpServer();
+      } else {
+        result = await useMcpStore.getState().updateMcpServer();
+      }
 
-    if (result) {
+      if (result) {
+        //wait for server list to refresh before closing the modal
+        await useMcpStore.getState().getLocalMcpServers(true);
+        setIsChatReady(true);
+      }
+    } catch (err) {
+      console.error("Error submitting MCP server:", err);
       setIsChatReady(true);
+    } finally {
+      useMcpStore.getState().closeMcpInput();
     }
-    useMcpStore.getState().closeMcpInput();
   };
 
   const namePattern = /^[A-Za-z0-9_-]+$/;
@@ -435,25 +507,32 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
     setIsChatReady(true);
   };
 
-  const handleMcpAgentSubmit = (type) => {
+  const handleMcpAgentSubmit = async (type) => {
     setIsChatReady(false);
 
     if (!Object.values(mcpAgentInputError).every((v) => v === false)) {
+      setIsChatReady(true);
       return;
     }
 
-    let result;
-    if (type === "Add") {
-      result = useMcpStore.getState().addMcpAgent();
-    } else {
-      result = useMcpStore.getState().updateMcpAgent();
-    }
+    try {
+      let result;
+      if (type === "Add") {
+        result = await useMcpStore.getState().addMcpAgent();
+      } else {
+        result = await useMcpStore.getState().updateMcpAgent();
+      }
 
-    if (result) {
+      if (result) {
+        await useMcpStore.getState().getMcpAgent(true);
+        setIsChatReady(true);
+      }
+    } catch (err) {
+      console.error("Error saving MCP agent:", err);
       setIsChatReady(true);
+    } finally {
+      useMcpStore.getState().closeMcpAgentInput();
     }
-
-    useMcpStore.getState().closeMcpAgentInput();
   };
 
   const handleAgentInputChange = (field) => (event) => {
@@ -487,11 +566,17 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
     setIsChatReady(true);
   };
 
+  const handleOpenMarketplace = () => {
+    useMcpStore.getState().closeMcpManagement();
+    useMcpStore.getState().openMcpMarketplace();
+  };
+
   // Render vertical layout (Agent table on top, Server table on bottom)
   const renderVerticalLayout = () => {
     // Use default 40% if calculation hasn't completed yet
-    const topPanelHeight = verticalSplitPercent !== null ? verticalSplitPercent : 40;
-    
+    const topPanelHeight =
+      verticalSplitPercent !== null ? verticalSplitPercent : 50;
+
     return (
       <Box
         className="tables-container vertical"
@@ -506,7 +591,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         }}
       >
         {/* Agent Table */}
-        <Box 
+        <Box
           className="filebox"
           sx={{
             display: "flex",
@@ -561,7 +646,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         />
 
         {/* Server Table */}
-        <Box 
+        <Box
           className="filebox"
           sx={{
             display: "flex",
@@ -594,118 +679,9 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
             addButtonText={t("mcp.ui.add")}
             removeButtonText={t("mcp.ui.remove")}
           />
+
           <Box sx={createTableContainerStyle(34)}>
             <McpServerTable />
-          </Box>
-        </Box>
-      </Box>
-    );
-  };
-
-  // Render horizontal layout (Agent table on left, Server table on right)
-  const renderHorizontalLayout = () => {
-    return (
-      <Box
-        className="tables-container horizontal"
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 0,
-          flex: 1,
-          minHeight: 0,
-          height: "100%",
-          overflow: "hidden",
-        }}
-      >
-        {/* Agent Table */}
-        <Box 
-          className="filebox resizable-left"
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: "none",
-            width: `${horizontalSplitPercent}%`,
-            height: "100%",
-          }}
-        >
-          <McpTableHeader
-            title={t("mcp.agent_table.title", "MCP Agents")}
-            onAdd={() => handleAgentInputModalOpen("Add")}
-            addDisabled={!isChatReady}
-            showRemove={false}
-            addButtonText={t("mcp.ui.add_agent_button")}
-          />
-          <Box sx={createTableContainerStyle(34)}>
-            <McpAgentTable layoutMode="horizontal" />
-          </Box>
-        </Box>
-
-        {/* Resize Handle - Horizontal */}
-        <Box
-          className="resize-handle resize-handle-horizontal"
-          onMouseDown={handleMouseDown}
-          sx={{
-            width: "6px",
-            minWidth: "6px",
-            cursor: "col-resize",
-            backgroundColor: "var(--divider-color)",
-            position: "relative",
-            flexShrink: 0,
-            zIndex: 1000,
-            transition: "background-color 0.15s ease",
-            "&:hover": {
-              backgroundColor: "var(--primary-color)",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "2px",
-              height: "40px",
-              backgroundColor: "var(--text-secondary-color)",
-              borderRadius: "1px",
-              opacity: 0.5,
-            },
-          }}
-        />
-
-        {/* Server Table */}
-        <Box 
-          className="filebox resizable-right"
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: "none",
-            width: `${100 - horizontalSplitPercent}%`,
-            height: "100%",
-          }}
-        >
-          <McpTableHeader
-            title={t("mcp.server_table.title", "MCP Servers")}
-            onAdd={() => handleInputModalOpen("Add")}
-            onRemove={() => {
-              useMcpStore.getState().setMcpRemoveType("server");
-              useMcpStore.getState().setMcpRemoveModalOpen(true);
-            }}
-            addDisabled={!isChatReady || loadingMcpServers.length > 0}
-            removeDisabled={
-              !isChatReady ||
-              selectedMcpServer.length === 0 ||
-              (selectedMcpServer.length > 0 &&
-                (selectedMcpServer.some((server) =>
-                  runningMcpServers.includes(server.server_name)
-                ) ||
-                  selectedMcpServerId.some((id) =>
-                    mcpAgents.some((agent) => agent.server_ids.includes(id))
-                  )))
-            }
-            addButtonText={t("mcp.ui.add")}
-            removeButtonText={t("mcp.ui.remove")}
-          />
-          <Box sx={createTableContainerStyle(34)}>
-            <McpServerTable layoutMode="horizontal" />
           </Box>
         </Box>
       </Box>
@@ -718,38 +694,30 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
       <div className="mcp-modal-overlay" onClick={(e) => e.stopPropagation()}>
         <Box
           sx={{
-            justifyContent: "space-between",
             display: "flex",
-            marginBottom: "8px",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
           <Button
             variant="contained"
-            className="close-button"
+            className="mcp-header-btn"
             onClick={handleManagementUIClose}
-            sx={{ height: "28px", gap: "8px", fontSize: "13px" }}
           >
             <ArrowCircleLeft sx={{ fontSize: "18px" }} />
             {t("mcp.ui.back")}
           </Button>
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <ToggleButtonGroup
-              value={layoutMode}
-              exclusive
-              onChange={(e, newMode) => newMode && setLayoutMode(newMode)}
-              size="small"
-              sx={{ height: "28px" }}
-            >
-              <ToggleButton value="vertical" aria-label="vertical layout" sx={{ fontSize: "12px", padding: "4px 8px" }}>
-                <ViewAgendaIcon sx={{ fontSize: "16px", marginRight: "4px" }} />
-                Vertical
-              </ToggleButton>
-              <ToggleButton value="horizontal" aria-label="horizontal layout" sx={{ fontSize: "12px", padding: "4px 8px" }}>
-                <ViewColumnIcon sx={{ fontSize: "16px", marginRight: "4px" }} />
-                Side by Side
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+
+          <Button
+            variant="contained"
+            className="mcp-header-btn"
+            onClick={handleOpenMarketplace}
+            disabled={!isChatReady}
+          >
+            <McpMarketplaceIcon sx={{ fontSize: "18px" }} />
+            {t("mcp.ui.mcp_marketplace")}
+          </Button>
         </Box>
 
         {/* Tables Container */}
@@ -760,7 +728,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
             minHeight: 0,
             height: "100%",
             overflow: "hidden",
-            cursor: isResizing ? (layoutMode === "vertical" ? "row-resize" : "col-resize") : "default",
+            cursor: isResizing ? "row-resize" : "default",
             userSelect: isResizing ? "none" : "auto",
           }}
         >
@@ -781,7 +749,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
               </Typography>
             </Box>
           ) : (
-            layoutMode === "vertical" ? renderVerticalLayout() : renderHorizontalLayout()
+            renderVerticalLayout()
           )}
         </Box>
       </div>
@@ -791,7 +759,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         open={mcpRemoveModalOpen}
         handleClose={() => useMcpStore.getState().setMcpRemoveModalOpen(false)}
         header={
-          <strong>
+          <strong style={{ color: "var(--text-primary-color)" }}>
             {t("mcp.ui.confirm_remove")}{" "}
             {mcpRemoveType === "server"
               ? t("mcp.ui.mcp_server")
@@ -872,7 +840,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         open={mcpAgentInputOpen}
         handleClose={handleAgentInputModalClose}
         header={
-          <strong>
+          <strong style={{ color: "var(--text-primary-color)" }}>
             {mcpAgentInputType === "Add"
               ? t("mcp.ui.add_agent")
               : t("mcp.ui.edit_agent")}
@@ -942,10 +910,10 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
                   mcpAgentInputError.agentName
                     ? "MCP Agent Name is required"
                     : mcpAgentInputError.agentNameDuplicate
-                    ? "MCP Agent Name already exists"
-                    : mcpAgentInputError.agentNameInvalid
-                    ? "Only letters, numbers, dashes, and underscores are allowed"
-                    : ""
+                      ? "MCP Agent Name already exists"
+                      : mcpAgentInputError.agentNameInvalid
+                        ? "Only letters, numbers, dashes, and underscores are allowed"
+                        : ""
                 }
                 slotProps={{
                   formHelperText: {
@@ -1019,10 +987,10 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
                   getOptionLabel={(option) => option.server_name}
                   value={
                     Array.isArray(mcpAgentInput.mcpServerIds) &&
-                    mcpAgentInput.mcpServerIds.length > 0
+                      mcpAgentInput.mcpServerIds.length > 0
                       ? mcpServers.filter((server) =>
-                          mcpAgentInput.mcpServerIds.includes(server.id)
-                        )
+                        mcpAgentInput.mcpServerIds.includes(server.id)
+                      )
                       : []
                   }
                   disabled={
@@ -1060,7 +1028,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         open={mcpInputOpen}
         handleClose={handleInputModalClose}
         header={
-          <strong>
+          <strong style={{ color: "var(--text-primary-color)" }}>
             {mcpInputType === "Add" ? t("mcp.ui.add") : t("mcp.ui.edit")}
           </strong>
         }
@@ -1101,7 +1069,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
         }
         assistant={assistant}
       >
-        <div className="mcpmodal">
+        <div className="mcpmodal" style={{ maxHeight: "70vh" }}>
           <div className="mcpmodal-container">
             <FormControl
               component="fieldset"
@@ -1112,6 +1080,22 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
                   runningMcpServers.includes(mcpInput.mcpServerName))
               }
             >
+              {mcpInputType === "Add" && (
+                <>
+                  {/* Docker MCP Server Recommendation Banner */}
+                  <Alert
+                    severity="info"
+                    sx={{
+                      width: "100%",
+                      boxSizing: "border-box",
+                      mb: 2,
+                      fontSize: "15px",
+                    }}
+                  >
+                    {t("mcp.ui.docker_recommendation_description")}{" "}
+                  </Alert>
+                </>
+              )}
               <div
                 className="radio-group-with-label"
                 sx={{ display: "flex", width: "100%" }}
@@ -1125,12 +1109,12 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
                 >
                   <FormControlLabel
                     value="url"
-                    control={<Radio color={"default"} />}
+                    control={<Radio color="primary" />}
                     label={t("mcp.ui.url_radio")}
                   />
                   <FormControlLabel
                     value="command"
-                    control={<Radio color={"default"} />}
+                    control={<Radio color="primary" />}
                     label={t("mcp.ui.command_radio")}
                   />
                 </RadioGroup>
@@ -1138,7 +1122,7 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
             </FormControl>
 
             <div className="mcpmodal-content">
-              <Typography className="textfield-title">
+              <Typography className="textfield-title" sx={{ color: "var(--text-primary-color)" }}>
                 <span style={{ color: "red" }}>*</span>{" "}
                 {t("mcp.ui.mcp_server_name")}
               </Typography>
@@ -1161,10 +1145,10 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
                   mcpInputError.mcpServerName
                     ? "MCP Server Name is required"
                     : mcpInputError.mcpServerNameDuplicate
-                    ? "MCP Server Name already exists"
-                    : mcpInputError.mcpServerNameInvalid
-                    ? "Only letters, numbers, dashes, and underscores are allowed"
-                    : ""
+                      ? "MCP Server Name already exists"
+                      : mcpInputError.mcpServerNameInvalid
+                        ? "Only letters, numbers, dashes, and underscores are allowed"
+                        : ""
                 }
                 slotProps={{
                   formHelperText: {
@@ -1277,42 +1261,28 @@ const McpManagement = ({ isSidebarOpen = false, closePanels = () => {} }) => {
                 }}
               />
             </div>
-            {/* <div className="mcpmodal-content">
-              <FormControlLabel
-                sx={{ display: "flex" }}
-                label={t("mcp.ui.disabled_checkbox")}
-                control={
-                  <Checkbox
-                    checked={mcpInput.mcpServerDisabled}
-                    onChange={handleInputChange("mcpServerDisabled")}
-                  />
-                }
-              />
-            </div> */}
           </div>
           {mcpInputType === "Update" && (
             <div className="mcpmodal-container">
               <Typography>{t("mcp.ui.mcp_server_info")}</Typography>
               <div className="mcpmodal-metadata">
-                {mcpServerTools.length > 0 ? (
-                  mcpServerTools.map((tool, index) => (
-                    <div key={index} className="mcpmodal-metadata-tool">
-                      <div>
-                        <strong>{tool.name}</strong>
-                      </div>
-                      <div>{tool.description}</div>
-                    </div>
-                  ))
-                ) : fetchingMcpServerTools ? (
-                  <div>{t("mcp.ui.mcp_server_info_fetching")}</div>
-                ) : (
-                  <div>{t("mcp.ui.mcp_server_info_empty")}</div>
-                )}
+                <McpServerInfo
+                  serverName={mcpInput.mcpServerName}
+                  serverConfig={mcpServers.find(
+                    (s) => s.server_name === mcpInput.mcpServerName
+                  )}
+                  tools={mcpServerTools[mcpInput.mcpServerName] || []}
+                  isLoading={fetchingMcpServerTools}
+                  showServerName={false}
+                  show="tools"
+                />
               </div>
             </div>
           )}
         </div>
       </FluidModal>
+
+      <McpToolsDialog />
     </>
   );
 };

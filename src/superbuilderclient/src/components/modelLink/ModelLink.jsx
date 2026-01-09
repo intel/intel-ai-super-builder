@@ -27,6 +27,7 @@ const ModelLink = ({ displayText = "View Model Card", modelName, getLink }) => {
   // return clickable link only if valid sanitized URL, otherwise return nothing
   return safeURL ? (
     <Link
+      data-testid="model-view-card-link"
       onClick={async (e) => {
         if (safeURL) {
           await openUrl(safeURL);

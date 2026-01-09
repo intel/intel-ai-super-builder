@@ -19,7 +19,7 @@ use tonic::transport::Channel;
 use tokio::sync::Mutex;
 use tauri::Window;
 use tauri::Emitter;
-use serde::{ Deserialize, Serialize };
+use serde::{ Deserialize };
 use serde_json::{ json };
 
 pub mod super_builder {
@@ -192,46 +192,66 @@ pub async fn stop_chat(
 
 #[tauri::command]
 pub async fn load_models(
-    _window: tauri::Window,
+    window: tauri::Window,
     client: State<'_, SharedClient>
 ) -> Result<bool, String> {
-    let mut client_guard = client.lock().await;
-    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: load_models called");
+        window.emit("load_models_progress", "Mock: Models loaded successfully").ok();
+        return Ok(true);
+    }
 
-    // Build and send load models request
-    let request = super_builder::LoadModelsRequest {};
-    let response = client_ref
-        .load_models(request).await
-        .map_err(|e| format!("Failed to load models: {}", e))?;
-    let reply = response.into_inner();
-    Ok(reply.status)
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        let _ = window;
+        let mut client_guard = client.lock().await;
+        let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+
+        // Build and send load models request
+        let request = super_builder::LoadModelsRequest {};
+        let response = client_ref
+            .load_models(request).await
+            .map_err(|e| format!("Failed to load models: {}", e))?;
+        let reply = response.into_inner();
+        Ok(reply.status)
+    }
 }
 
 #[tauri::command]
 pub async fn connect_client(client: State<'_, SharedClient>) -> Result<(), String> {
-    // Determine the path to the config file, e.g., from an environment variable or default location
-    let config_path = env
-        ::var("CONFIG_PATH")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("config.toml"));
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: connect_client - skipping middleware connection");
+        return Ok(());
+    }
 
-    // Load the configuration
-    let config = MyConfig::load_config(config_path).map_err(|e|
-        format!("Failed to load config: {:?}", e)
-    )?;
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        // Determine the path to the config file, e.g., from an environment variable or default location
+        let config_path = env
+            ::var("CONFIG_PATH")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("config.toml"));
 
-    // Use the configuration to connect to the gRPC server
-    let host = config.grpc.host.unwrap_or_else(|| "localhost".to_string());
-    let port = config.grpc.port.unwrap_or_else(|| 50051); // Provide a default port if None
+        // Load the configuration
+        let config = MyConfig::load_config(config_path).map_err(|e|
+            format!("Failed to load config: {:?}", e)
+        )?;
 
-    let new_client = SuperBuilderClient::connect(format!("http://{}:{}", host, port)).await.map_err(
-        |_e| format!("Failed to connect to middleware.")
-    )?;
+        // Use the configuration to connect to the gRPC server
+        let host = config.grpc.host.unwrap_or_else(|| "localhost".to_string());
+        let port = config.grpc.port.unwrap_or_else(|| 50051); // Provide a default port if None
 
-    let mut client_guard = client.lock().await;
-    *client_guard = Some(new_client);
+        let new_client = SuperBuilderClient::connect(format!("http://{}:{}", host, port)).await.map_err(
+            |_e| format!("Failed to connect to middleware.")
+        )?;
 
-    Ok(())
+        let mut client_guard = client.lock().await;
+        *client_guard = Some(new_client);
+
+        Ok(())
+    }
 }
 
 #[tauri::command]
@@ -241,42 +261,60 @@ pub async fn initialize_client() -> SharedClient {
 
 #[tauri::command]
 pub async fn mw_say_hello(client: State<'_, SharedClient>) -> Result<String, String> {
-    // Lock the Mutex and ensure the client is mutable
-    let mut client_guard = client.lock().await;
-    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: mw_say_hello called");
+        return Ok(crate::mock::mock_data::get_mock_system_info());
+    }
 
-    let request = super_builder::SayHelloRequest {
-        name: "UI".to_string(),
-    };
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        // Lock the Mutex and ensure the client is mutable
+        let mut client_guard = client.lock().await;
+        let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
 
-    let response = client_ref
-        .say_hello(request).await
-        .map_err(|e| format!("Failed to connect: {}", e))?;
+        let request = super_builder::SayHelloRequest {
+            name: "UI".to_string(),
+        };
 
-    // Extract the actual HealthReply message from the tonic::Response
-    let reply = response.into_inner();
-    // println!("reply {}", reply.message.to_string());
-    Ok(reply.message.to_string())
+        let response = client_ref
+            .say_hello(request).await
+            .map_err(|e| format!("Failed to connect: {}", e))?;
+
+        // Extract the actual HealthReply message from the tonic::Response
+        let reply = response.into_inner();
+        // println!("reply {}", reply.message.to_string());
+        Ok(reply.message.to_string())
+    }
 }
 
 #[tauri::command]
 pub async fn pyllm_say_hello(client: State<'_, SharedClient>) -> Result<String, String> {
-    // Lock the Mutex and ensure the client is mutable
-    let mut client_guard = client.lock().await;
-    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: pyllm_say_hello - returning 'ready'");
+        return Ok("ready".to_string());
+    }
 
-    let request = super_builder::SayHelloRequest {
-        name: "UI".to_string(),
-    };
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        // Lock the Mutex and ensure the client is mutable
+        let mut client_guard = client.lock().await;
+        let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
 
-    let response = client_ref
-        .say_hello_pyllm(request).await
-        .map_err(|e| format!("Failed to connect: {}", e))?;
+        let request = super_builder::SayHelloRequest {
+            name: "UI".to_string(),
+        };
 
-    // Extract the actual HealthReply message from the tonic::Response
-    let reply = response.into_inner();
-    println!("reply {}", reply.message.to_string());
-    Ok(reply.message.to_string())
+        let response = client_ref
+            .say_hello_pyllm(request).await
+            .map_err(|e| format!("Failed to connect: {}", e))?;
+
+        // Extract the actual HealthReply message from the tonic::Response
+        let reply = response.into_inner();
+        println!("reply {}", reply.message.to_string());
+        Ok(reply.message.to_string())
+    }
 }
 
 #[tauri::command]
@@ -462,7 +500,8 @@ pub async fn get_file_list(client: State<'_, SharedClient>) -> Result<String, St
     Ok(reply.file_list)
 }
 
-// Send email from outlook
+// Send email from outlook (Windows only)
+#[cfg(target_os = "windows")]
 #[tauri::command]
 pub async fn send_email(
     recipient: Option<String>,
@@ -521,6 +560,17 @@ pub async fn send_email(
         .spawn();
 
     Ok(())
+}
+
+// Linux/macOS stub for send_email
+#[cfg(not(target_os = "windows"))]
+#[tauri::command]
+pub async fn send_email(
+    _recipient: Option<String>,
+    _subject: String,
+    _message: String
+) -> Result<(), String> {
+    Err("Email functionality is only available on Windows".to_string())
 }
 
 #[tauri::command]
@@ -617,22 +667,31 @@ pub async fn get_config(
     db_client: tauri::State<'_, SharedClient>,
     assistant: String
 ) -> Result<String, String> {
-    // Get a mutable reference to the QueryClient from the shared state
-    let mut client_guard = db_client.lock().await;
-    let db_client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
-    // Create the QueryRequest
-    let request = super_builder::GetClientConfigRequest {
-        assistant,
-    };
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: get_config called for assistant: {}", assistant);
+        return Ok(crate::mock::mock_data::get_mock_config());
+    }
 
-    // Perform the gRPC query
-    let response = db_client_ref
-        .get_client_config(request).await
-        .map_err(|e| format!("Failed to query database: {}", e))?;
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        // Get a mutable reference to the QueryClient from the shared state
+        let mut client_guard = db_client.lock().await;
+        let db_client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+        // Create the QueryRequest
+        let request = super_builder::GetClientConfigRequest {
+            assistant,
+        };
 
-    // Extract the message from the QueryReply
-    let reply = response.into_inner();
-    Ok(reply.data)
+        // Perform the gRPC query
+        let response = db_client_ref
+            .get_client_config(request).await
+            .map_err(|e| format!("Failed to query database: {}", e))?;
+
+        // Extract the message from the QueryReply
+        let reply = response.into_inner();
+        Ok(reply.data)
+    }
 }
 
 #[tauri::command]
@@ -762,54 +821,46 @@ pub async fn set_models(
     Ok(reply.models_loaded)
 }
 
-#[derive(Serialize, Deserialize)]
-struct LlmModel {
-    short_name: Option<String>,
-    full_name: String,
-    model_type: String,
-    download_link: Option<String>,
-    model_card: Option<String>,
-    commit_id: Option<String>,
-}
-
 #[tauri::command]
 pub async fn update_db_models(
     client: State<'_, SharedClient>,
     assistant: String,
     models_json: String
 ) -> Result<String, String> {
-    let mut client_guard = client.lock().await;
-    let db_client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
-    /* 
-    let mut models_list: Vec<LlmModel> = serde_json::from_str(&models_json).map_err(|e| format!("Failed to parse models JSON: {}", e))?;
-
-    for model in &mut models_list {
-        model.model_origin = "UserSelected".to_string();
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: update_db_models - assistant: {}, models: {}", assistant, models_json);
+        return Ok("Mock: Assistant set successfully.".to_string());
     }
 
-    let updated_models_json = serde_json::to_string(&models_list).map_err(|e| format!("Failed to serialize updated models: {}", e))?;*/
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        let mut client_guard = client.lock().await;
+        let db_client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
 
-    let request = super_builder::SetActiveAssistantRequest {
-        assistant: assistant.into(),
-        models_json: models_json.into(),
-    };
+        let request = super_builder::SetActiveAssistantRequest {
+            assistant: assistant.into(),
+            models_json: models_json.into(),
+        };
 
-    let response = db_client_ref
-        .set_active_assistant(request).await
-        .map_err(|e| format!("Failed to query database: {}", e))?;
+        let response = db_client_ref
+            .set_active_assistant(request).await
+            .map_err(|e| format!("Failed to query database: {}", e))?;
 
-    if response.into_inner().success {
-        println!("Assistant set successfully.");
+        if response.into_inner().success {
+            println!("Assistant set successfully.");
+        }
+
+        Ok("Assistant set successfully.".to_string())
     }
-
-    Ok("Assistant set successfully.".to_string())
 }
 
 #[tauri::command]
 pub async fn convert_model(
     client: tauri::State<'_, SharedClient>,
     model_path: String,
-    parameters: Option<String>
+    parameters: Option<String>,
+    token_id: Option<String>
 ) -> Result<String, String> {
     let mut client_guard = client.lock().await;
     let db_client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
@@ -817,6 +868,7 @@ pub async fn convert_model(
     let request = super_builder::ConvertModelRequest {
         model_path: model_path.into(),
         parameters: parameters.into(),
+        token_id: token_id.into(),
     };
 
     let response = db_client_ref
@@ -943,20 +995,30 @@ pub async fn set_user_config_view_model(
     client: State<'_, SharedClient>,
     vm: String //MW defined serialized UserConfigViewModel object
 ) -> Result<String, String> {
-    let mut client_guard = client.lock().await;
-    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+    #[cfg(feature = "mock-backend")]
+    {
+        println!("🔧 MOCK MODE: set_user_config_view_model called");
+        println!("📝 Config update: {}", vm);
+        return Ok(crate::mock::mock_data::mock_set_config_success());
+    }
 
-    let request = super_builder::SetUserConfigViewModelRequest {
-        view_model: vm,
-    };
+    #[cfg(not(feature = "mock-backend"))]
+    {
+        let mut client_guard = client.lock().await;
+        let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
 
-    let response = client_ref
-        .set_user_config_view_model(request).await
-        .map_err(|e| format!("Failed to set userconfig viewmodel: {}", e))?;
+        let request = super_builder::SetUserConfigViewModelRequest {
+            view_model: vm,
+        };
 
-    let reply = response.into_inner();
+        let response = client_ref
+            .set_user_config_view_model(request).await
+            .map_err(|e| format!("Failed to set userconfig viewmodel: {}", e))?;
 
-    Ok(reply.message)
+        let reply = response.into_inner();
+
+        Ok(reply.message)
+    }
 }
 
 #[tauri::command]

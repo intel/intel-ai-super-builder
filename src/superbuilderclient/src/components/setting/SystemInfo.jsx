@@ -59,8 +59,8 @@ export const SystemInfoCard = () => {
                     values={[
                         gpu.Name || 'Unknown',
                         gpu.DriverVersion || 'Unknown',
-                        `${gpu.MemoryInGB || 'Unknown'}GB`,
                     ]}
+                    data-testid={`system-info-gpu-${index + 1}`}
                 />
             ));
         }
@@ -71,6 +71,7 @@ export const SystemInfoCard = () => {
         <SimpleAccordion
             title={t('setting.systeminfo.title')}
             description={t('setting.systeminfo.description')}
+            data-testid="system-info-accordion"
         >
             <SystemInfoItem
                 icon="cpu"
@@ -80,6 +81,7 @@ export const SystemInfoCard = () => {
                     getSystemValue("cpu_core"),
                     getSystemValue("cpu_lcore"),
                 ]}
+                data-testid="system-info-cpu"
             />
             <SystemInfoItem
                 icon="memory-card"
@@ -88,6 +90,7 @@ export const SystemInfoCard = () => {
                     getSystemValue("ram"),
                     getSystemValue("ram_freq"),
                 ]}
+                data-testid="system-info-ram"
             />
             {renderGpuItems()}
             <SystemInfoItem
@@ -98,13 +101,19 @@ export const SystemInfoCard = () => {
                     getSystemValue("npu_version"),
                     getSystemValue("npu_id"),
                 ]}
+                data-testid="system-info-npu"
             />
         </SimpleAccordion>
     )
 
 };
 
-const SystemInfoItem = ({ icon, title, values }) => {
+const SystemInfoItem = ({
+    icon,
+    title,
+    values,
+    'data-testid': dataTestId,
+}) => {
     // Helper function to get the correct icon component
     const getIcon = (iconName) => {
         switch (iconName) {
@@ -120,7 +129,7 @@ const SystemInfoItem = ({ icon, title, values }) => {
     };
 
     return (
-        <Card orientation="vertical" className="system-info-card">
+        <Card orientation="vertical" className="system-info-card" data-testid={dataTestId} >
             <div className="system-div">
                 <div className="system-type">
                     {getIcon(icon)}

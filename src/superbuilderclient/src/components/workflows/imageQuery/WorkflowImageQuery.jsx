@@ -47,7 +47,7 @@ const WorkflowImageQuery = ({loading}) => {
                 title="Vision Model Required"
                 content={
                     <span>
-                        A vision model is required for this feature. Would you like to switch to recommended vision model <b>{getWorkflowRecommendedModel()}</b>?
+                        A vision model is required for this feature. Would you like to switch to recommended vision model <b>{getWorkflowRecommendedModel()?.[0]}</b>?
                     </span>
                 }
                 confirmText="Switch Models"

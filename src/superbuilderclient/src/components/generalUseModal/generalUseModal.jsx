@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import AssistantLogo from "../assistantLogo/assistantLogo";
 import "./generalUseModal.css";
 import { useRef, useEffect } from "react";
@@ -18,7 +18,8 @@ const ModalWrapper = ({
   header,
   buttonName,
   hideFooter,
-  footerContent
+  footerContent,
+  'data-testid': dataTestId,
 }) => {
   const { assistant } = useDataStore();
   const containerRef = useRef(null);
@@ -36,7 +37,7 @@ const ModalWrapper = ({
 
   const defaultFooter = (
     <div className={hideFooter ? "no-footer" : "info-footer"}>
-      <Button className="footer-button" variant="contained" onClick={close} sx={{borderRadius:"0px"}}>
+      <Button className="footer-button" variant="contained" onClick={close} sx={{borderRadius:"0px"}} data-testid="modalwrapper-close-button">
         {buttonName}
       </Button>
     </div>
@@ -57,6 +58,7 @@ const ModalWrapper = ({
       }}
       scroll="paper"
       maxWidth="md"
+      data-testid={dataTestId}
     >
       <DialogTitle className="info-header" id="scroll-dialog-title" sx={{ p: 0 }}>
         <div className="info-logo"

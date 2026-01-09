@@ -21,16 +21,18 @@
   flex-direction: row;
   gap: 32px;
   width: 100%;
+  margin-bottom: 20px;
 }
 
 .mcpmodal-container {
   flex: 1 1 0;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mcpmodal-metadata {
   background-color: var(--divider-color);
-  color: var(--text-primary-color);
   padding: 8px;
   border-radius: 3px;
   font-size: 14px;
@@ -47,12 +49,22 @@
 }
 
 /* Compact button styling */
-.mcp-modal-overlay .close-button,
+.mcp-modal-overlay .mcp-header-btn {
+  font-size: 13px !important;
+  padding: 4px 12px !important;
+  height: 32px !important;
+  min-width: 150px !important;
+  margin: 8px 0 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .mcp-modal-overlay .add-buttons,
 .mcp-modal-overlay .remove-buttons {
   font-size: 13px !important;
   padding: 4px 12px !important;
-  height: 28px !important;
+  height: 32px !important;
 }
 
 /* Filebox spacing - reduce gaps between tables */
@@ -70,28 +82,6 @@
   overflow: hidden;
 }
 
-/* Side-by-side layout */
-.tables-container.horizontal {
-  flex-direction: row;
-  height: 100%;
-}
-
-.tables-container.horizontal .filebox {
-  flex: 0 0 auto;
-  min-width: 300px;
-  height: 100%;
-}
-
-.tables-container.horizontal .filebox.resizable-left {
-  min-width: 300px;
-  flex: 0 0 auto;
-}
-
-.tables-container.horizontal .filebox.resizable-right {
-  min-width: 300px;
-  flex: 0 0 auto;
-}
-
 /* Vertical layout */
 .tables-container.vertical {
   flex-direction: column;
@@ -100,17 +90,17 @@
 
 .tables-container.vertical .filebox {
   flex: 0 0 auto;
-  min-height: 250px; /* Increased minimum height for better stability */
+  min-height: 300px; /* Increased minimum height for better stability */
   overflow: hidden;
 }
 
 /* Prevent DataGrid from crashing with small heights */
 .tables-container.vertical .MuiDataGrid-root {
-  min-height: 250px !important;
+  min-height: 150px !important;
 }
 
 .tables-container.vertical .MuiDataGrid-virtualScroller {
-  min-height: 150px !important;
+  min-height: 100px !important;
 }
 
 /* Fix virtual scroller content gaps and empty rows */
@@ -209,11 +199,6 @@
   background-color: var(--primary-color) !important;
 }
 
-/* Horizontal resize handle */
-.resize-handle-horizontal {
-  cursor: col-resize !important;
-}
-
 /* Vertical resize handle */
 .resize-handle-vertical {
   cursor: row-resize !important;
@@ -233,12 +218,6 @@
 .tables-container.resizing .resize-handle {
   pointer-events: auto !important;
   background-color: var(--primary-color) !important;
-}
-
-/* Global cursor override during resize - horizontal */
-body.resizing .tables-container.horizontal,
-body.resizing .tables-container.horizontal * {
-  cursor: col-resize !important;
 }
 
 /* Global cursor override during resize - vertical */

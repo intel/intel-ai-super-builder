@@ -1,17 +1,17 @@
-﻿import "./AdvancedSlider.css";
+import "./AdvancedSlider.css";
 import React from "react";
 import { Slider } from "@mui/material";
 
-const AdvancedSlider = ({
-    label,
-    description,
-    value,
-    onChange,
+const AdvancedSlider = ({ 
+    label, 
+    description, 
+    value, 
+    onChange, 
     onChangeCommitted, // Add new prop
-    min,
-    max,
-    step = 1,
-    disable = false
+    min, 
+    max, 
+    step = 1, 
+    disable = false 
 }) => {
     // Ensure value is a number
     const numericValue = Number(value);
@@ -56,6 +56,7 @@ const AdvancedSlider = ({
             </div>
             <input
                 className="slider-input"
+                data-testid="advanced-slider-input"
                 type="number"
                 step={step}
                 value={numericValue}

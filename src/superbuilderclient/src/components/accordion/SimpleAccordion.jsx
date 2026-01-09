@@ -19,7 +19,13 @@ import {
   IconButton,
 } from "@mui/material";
 
-const SimpleAccordion = ({ title, description, children, variant="normal" }) => {
+const SimpleAccordion = ({ 
+  title, 
+  description, 
+  children, 
+  variant="normal",
+  'data-testid': dataTestId,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleAccordion = () => {
@@ -27,15 +33,15 @@ const SimpleAccordion = ({ title, description, children, variant="normal" }) => 
   };
 
   return (
-    <div className="accordion">
-      <button className="accordion-button" onClick={toggleAccordion}>
+    <div className="accordion" data-testid={dataTestId}>
+      <button className="accordion-button" onClick={toggleAccordion} data-testid={dataTestId + "-toggle-button"}>
         <div className="accordion-information">
           <Typography className={"accordion-title " + (variant === "small" ? "accordion-small-title" : "")}>{title}</Typography>
           <Typography variant="caption" gutterBottom className="accordion-description">{description}</Typography>
         </div>
         <Typography className="accordion-arrow">{isOpen ? "▲" : "▼"}</Typography>
       </button>
-      {isOpen && <div className="accordion-content">{children}</div>}
+      {isOpen && <div className="accordion-content" data-testid="accordion-content-area">{children}</div>}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-﻿import "./ChatHistory.css";
+import "./ChatHistory.css";
 import { TextField, IconButton } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -41,6 +41,7 @@ const SessionItem = ({ session, onClose }) => {
   return (
     <li
       className={`history-item ${session.selected ? "selected" : ""}`}
+      data-testid="chat-history-session-item"
       onMouseOver={() => setHover(true)}
       onMouseOut={() => setHover(false)}
       onClick={() => {
@@ -61,6 +62,7 @@ const SessionItem = ({ session, onClose }) => {
           className={`history-item-edit history-item-icon ${
             hover ? "history-item-icon-hover" : ""
           }`}
+          data-testid="chat-history-edit-session-button"
           onClick={(e) => {
             e.stopPropagation();
             setEdit(true);
@@ -75,6 +77,7 @@ const SessionItem = ({ session, onClose }) => {
             className={`history-item-remove history-item-icon ${
               hover ? "history-item-icon-hover" : ""
             }`}
+            data-testid="chat-history-delete-session-button"
             onClick={(e) => {
               e.stopPropagation();
               if (sessions.length > 1) {
@@ -95,6 +98,7 @@ const SessionItem = ({ session, onClose }) => {
           }}
           value={inputName}
           variant="standard"
+          data-testid="chat-history-session-name-input"
           onChange={(event) => setInputName(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
@@ -126,6 +130,7 @@ export const ChatHistory = ({ isOpen, onClose }) => {
     >
       <div
         className={`history-container ${isOpen ? "open" : ""}`}
+        data-testid="chat-history-container"
         onClick={(e) => e.stopPropagation()}
       >
         <ul className="history-list" type="simple">

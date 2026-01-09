@@ -5,7 +5,9 @@
   transform: translate(-50%, -50%);
   max-width: 1080px; /* Optional max width */
   background-color: var(--bg-color, #ffffff); /* Fallback to white if CSS variable fails */
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.23); /* Equivalent to boxShadow: 24 */
+  box-shadow:
+    0px 3px 6px rgba(0, 0, 0, 0.16),
+    0px 3px 6px rgba(0, 0, 0, 0.23); /* Equivalent to boxShadow: 24 */
   padding: 0; /* Equivalent to p: 4 (4 * 8px) */
   border-radius: 8px; /* Equivalent to borderRadius: 2 (2 * 4px) */
   max-height: 80vh; /* Maximum height of the modal */
@@ -98,12 +100,11 @@
   .modal-box {
     background-color: var(--bg-color, #2d2d2d);
   }
-  
+
   .modal-body {
     background-color: var(--bg-color, #2d2d2d);
   }
-  
-  .modal-header,
+
   .modal-footer {
     background-color: var(--bg-secondary-color, #3d3d3d);
   }

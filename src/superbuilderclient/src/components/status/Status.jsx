@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import "./Status.css";
 import { RagReadyContext } from "../context/RagReadyContext";
@@ -71,9 +71,9 @@ const Status = ({ setIsMinHWModalOpen, setIsNonValidHWModalOpen }) => {
       t("status.downloading_retry_1"),
       t("status.checking_backend"),
     ].some((keyword) => status?.includes(keyword));
-
+  
     document.body.classList.toggle("status-loading", isLoading);
-
+  
     // Cleanup on component unmount
     return () => {
       document.body.classList.remove("status-loading");
@@ -353,7 +353,7 @@ const Status = ({ setIsMinHWModalOpen, setIsNonValidHWModalOpen }) => {
 
   return (
     <div>
-      {status !== "Ready" && <footer className="footer">{status}</footer>}
+      {status !== "Ready" && <footer className="footer" data-testid="system-status-display">{status}</footer>}
     </div>
   );
 };

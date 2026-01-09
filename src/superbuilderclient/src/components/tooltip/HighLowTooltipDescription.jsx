@@ -39,6 +39,7 @@ const HighLowTooltipDescription = ({
       {children ||
         (isButton ? (
           <Button
+            data-testid="tooltip-info-button"
             onClick={onClick}
             sx={{ padding: 0, border: 'none', background: 'none' }}
           >

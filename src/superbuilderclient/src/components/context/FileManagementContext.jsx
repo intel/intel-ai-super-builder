@@ -196,17 +196,20 @@ const FileManagementProvider = ({ children }) => {
   const requestFiles = async (allowedTypes=[]) => {
     setIsChatReady(false);
     const validExt = allowedTypes.length > 0 ? allowedTypes : validExtensions // use all valid file types if none specified
-    const filepaths = await open({
-      title: t('draganddrop.file_manage.add_file_window_title'),
-      multiple: true,
-      directory: false,
-      filters: [
-        {
-          name: "Files",
-          extensions: validExt, // only show user valid file types to select from
-        },
-      ],
-    });
+    let filepaths;
+    // Check for mocked file paths for testing purposes as Windows file dialog cannot be automated
+    if (window.__TEST_MOCK_PATHS__) {
+        console.log("[Test] Using mocked file paths:", window.__TEST_MOCK_PATHS__);
+        filepaths = window.__TEST_MOCK_PATHS__;
+        window.__TEST_MOCK_PATHS__ = null; 
+    } else {
+        filepaths = await open({
+            title: t('draganddrop.file_manage.add_file_window_title'),
+            multiple: true,
+            directory: false,
+            filters: [{ name: "Files", extensions: validExt }],
+        });
+    }
     setIsChatReady(true);
     return filepaths;
   };

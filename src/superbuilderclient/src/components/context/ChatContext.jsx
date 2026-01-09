@@ -1,6 +1,6 @@
-﻿import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { useState, createContext, useEffect, useContext, React } from "react";
+import { useState, createContext, useEffect, useContext, useRef } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { RagReadyContext } from "./RagReadyContext";
 import { produce } from "immer";
@@ -24,11 +24,15 @@ export const ChatProvider = ({ children }) => {
   const [modelLoaded, setModelLoaded] = useState(false); // keep track for cold start status
   const [chatHistorySize, setChatHistorySize] = useState(0); // changing will not do anything, controlled by MW config DB
   const { assistant } = useDataStore(); // Access assistant from useDataStore
-  const [newChatModelNeeded,setNewChatModelNeeded] = useState(false); //control to allow selecting new model when chat load
+  const [newChatModelNeeded,setNewChatModelNeeded] = useState(false); //control to allow selecting new model when chat load 
   const[isModelSettingsReady,setIsModelSettingsReady] = useState(true);
   const { t } = useTranslation();
-  const [useSemanticSplitter, setUseSemanticSplitter] = useState(0); // changing will not do anything, controlled by MW config DB
-  const [useAllFiles, setUseAllFiles] = useState(0); // set from config, always selects all files to be active whenever possible
+  const [useSemanticSplitter, setUseSemanticSplitter] = useState(0);
+  const [useAllFiles, setUseAllFiles] = useState(0);
+
+  const thinkingStateRef = useRef({
+    isThinking: false
+  });
 
   // Extract chatHistorySize from assistant.parameters
   useEffect(() => {
@@ -42,12 +46,12 @@ export const ChatProvider = ({ children }) => {
         const otherCategory = parameters.categories.find(
           (category) => category.name === "other"
         ); // Find the "other" category
-
+        
         if (otherCategory) {
           const conversationHistoryField = otherCategory.fields.find(
             (field) => field.name === "conversation_history"
           ); // Find the "conversation_history" field
-
+          
           if (conversationHistoryField && conversationHistoryField.user_value) {
             setChatHistorySize(conversationHistoryField.user_value); // Set chatHistorySize
             console.log(
@@ -294,17 +298,79 @@ export const ChatProvider = ({ children }) => {
           return;
         }
         let chatResponse = JSON.parse(event.payload);
-        // console.log(chatResponse);
+        
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages];
           const lastIndex = updatedMessages.length - 1;
+          
           if (lastIndex >= 0) {
+            const newContent = chatResponse.message;
+            
+            let textToAdd = "";
+            let thinkingToAdd = "";
+            let isThinkingComplete = false;
+            
+            if (thinkingStateRef.current.isThinking) {
+              if (newContent.includes("</think>")) {
+                const parts = newContent.split("</think>");
+                thinkingToAdd = parts[0];  
+                if (parts.length > 1 && parts[1]) {
+                  textToAdd = parts[1];  
+                }
+                thinkingStateRef.current.isThinking = false;
+                isThinkingComplete = true;
+              } else {
+                thinkingToAdd = newContent;
+              }
+            } 
+            else {
+              if (newContent.includes("<think>")) {
+                if (newContent.includes("</think>")) {
+                  const thinkingMatch = newContent.match(/<think>([\s\S]*?)<\/think>/);
+                  if (thinkingMatch) {
+                    thinkingToAdd = thinkingMatch[1];
+                    const afterThinking = newContent.replace(/<think>[\s\S]*?<\/think>/, "");
+                    if (afterThinking) {
+                      textToAdd = afterThinking;
+                    }
+                  }
+                  isThinkingComplete = true;
+                } else {
+                  const parts = newContent.split("<think>");
+                  if (parts[0]) {
+                    textToAdd = parts[0];  
+                  }
+                  if (parts[1]) {
+                    thinkingToAdd = parts[1];  
+                    thinkingStateRef.current.isThinking = true;
+                  }
+                }
+              } else {
+                textToAdd = newContent;
+              }
+            }
+            
+            const currentMessage = updatedMessages[lastIndex];
+            const currentText = currentMessage.text || "";
+            const currentThinking = currentMessage.thinking || "";
+            const currentReferences = currentMessage.references || [];
+            
+            let finalText = currentText + textToAdd;
+            
+            let finalThinking = currentThinking;
+            if (thinkingToAdd) {
+              finalThinking = currentThinking + thinkingToAdd;
+            }
+            
             updatedMessages[lastIndex] = {
-              ...updatedMessages[lastIndex],
-              text: updatedMessages[lastIndex].text + chatResponse.message,
-              references: chatResponse.references,
+              ...currentMessage,
+              text: finalText,
+              references: chatResponse.references || currentReferences,
+              thinking: finalThinking,
+              thinkingComplete: isThinkingComplete || (currentMessage.thinkingComplete || false)
             };
           }
+          
           return updatedMessages;
         });
       });
@@ -318,14 +384,31 @@ export const ChatProvider = ({ children }) => {
           return;
         }
         setStreamCompleted(true);
+        
+        if (thinkingStateRef.current.isThinking) {
+          setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            const lastIndex = updatedMessages.length - 1;
+            if (lastIndex >= 0) {
+              updatedMessages[lastIndex] = {
+                ...updatedMessages[lastIndex],
+                thinkingComplete: true,
+              };
+            }
+            return updatedMessages;
+          });
+          thinkingStateRef.current.isThinking = false;
+        }
       });
     };
+    
     setupCompletedListener();
 
     return () => {
       isSubscribed = false;
       if (unlistenData) unlistenData();
       if (unlistenCompleted) unlistenCompleted();
+      thinkingStateRef.current.isThinking = false;
     };
   }, []);
 
@@ -356,13 +439,24 @@ export const ChatProvider = ({ children }) => {
             } catch (e) {
               queryData = {name: m.query_type}; // fallback to string value
             }
+            
+            let thinking = "";
+            let text = m.text;
+            const thinkingMatch = m.text.match(/<think>([\s\S]*?)<\/think>/);
+            if (thinkingMatch) {
+              thinking = thinkingMatch[1].trim();
+              text = m.text.replace(/<think>[\s\S]*?<\/think>/, "").trim();
+            }
+            
             var newMessage = {
               id: m.timestamp,
-              text: m.text,
+              text: text,
               sender: m.sender,
               queryType: queryData,
               references: m.references ? m.references : [], // set references if they exist, otherwise empty list
               attachedFiles: JSON.parse(m.attached_files), // set attached files if they exist
+              thinking: thinking,
+              thinkingComplete: thinking ? true : false,
             };
             newMessages.push(newMessage);
           }
@@ -442,7 +536,7 @@ export const ChatProvider = ({ children }) => {
         contextHistory.push({ Role: message.sender, Content: message.text });
       }
     });
-
+    
     const newMessage = {
       id: new Date().getTime(),
       text: input,
@@ -457,6 +551,8 @@ export const ChatProvider = ({ children }) => {
       sender: "assistant",
       queryType: queryType,
       attachedFiles: selectedFiles,
+      thinking: "",
+      thinkingComplete: false,
     };
 
     if (messages.length <= 2) {
@@ -551,3 +647,5 @@ export const ChatProvider = ({ children }) => {
     </ChatContext.Provider>
   );
 };
+
+export default ChatProvider;

@@ -44,6 +44,7 @@ const WorkflowDocScoring = ({loading, invoke}) => {
                                 <Checkbox
                                     checked={includeReasoning}
                                     onChange={(e) => setIncludeReasoning(e.target.checked)}
+                                    data-testid="doc-scoring-include-reasoning-checkbox"
                                 />
                                 <HighLowTooltipDescription
                                     overall_description={"When enabled, includes the reason for the scores. This will increase processing time."}
@@ -57,11 +58,13 @@ const WorkflowDocScoring = ({loading, invoke}) => {
                                     setValue={setScoringCriteria}
                                     onChange={(e) => setScoringCriteria(e.target.value)}
                                     onEnterKeyDown={submitScoringCriteria}
+                                    data-testid="doc-scoring-criteria-input"
                                 />
                                 <WorkflowButton
                                     onClick={submitScoringCriteria}
                                     disabled={loading || (scoringCriteria === "") || (attachedFiles.length <= 0)}
                                     text={"Evaluate"}
+                                    data-testid="doc-scoring-evaluate-button"
                                 />                            
                             </div>
                         </div>

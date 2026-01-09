@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import SideBar from "./sidebar/Sidebar";
 import Status from "./status/Status";
 import ModelDownloader from "./modelDownloader/modelDownloader";
@@ -64,7 +64,7 @@ function App() {
 
   return (
     <GlobalThemeProvider isSubWindow={false}>
-      <div className="mainwindow">
+      <div className="mainwindow" data-testid="app-main-window">
         <Topbar>
           <div
             className="dl-button-container"
@@ -74,6 +74,7 @@ function App() {
               onClick={() => setDownloadWindowsOpen(!downloadWindowsOpen)}
               size="small"
               className="window-control"
+              data-testid="model-download-toggle-button"
               sx={{
                 color: assistant?.header_text_bg_color,
                 padding: "8px",
@@ -99,6 +100,7 @@ function App() {
             }
             hideFooter={isNonValidHWModalOpen ? false : true}
             buttonName={"OK"}
+            data-testid="hardware-requirements-modal"
           >
             {isNonValidHWModalOpen ? (
               <div>

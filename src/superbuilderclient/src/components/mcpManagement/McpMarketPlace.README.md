@@ -1,11 +1,13 @@
 # MCP Marketplace Component
 
 ## Overview
+
 The `McpMarketPlace.jsx` component provides an app store-like interface for browsing and managing MCP (Model Context Protocol) server modules. It integrates with ModelScope's MCP Server Marketplace API to fetch and display available MCP servers with intelligent caching, search functionality, and unique server naming to prevent conflicts.
 
 ## Features
 
 ### 1. **App Store Interface**
+
 - Grid layout with cards displaying MCP modules (300x200px cards)
 - Each card shows:
   - Icon (logo image or emoji fallback)
@@ -19,6 +21,7 @@ The `McpMarketPlace.jsx` component provides an app store-like interface for brow
 - Hover effects with elevation and transform
 
 ### 2. **Smart Search Functionality** ✨ NEW
+
 - Real-time search filter (600px wide search bar)
 - Searches across multiple fields:
   - Item name (English and Chinese)
@@ -31,6 +34,7 @@ The `McpMarketPlace.jsx` component provides an app store-like interface for brow
 - Search icon indicators
 
 ### 3. **Intelligent Caching System** ✨ NEW
+
 - **10-minute cache** for marketplace data (configurable via `setMarketplaceCacheTimeout()`)
 - Automatic cache invalidation when:
   - Filters or search terms change
@@ -42,6 +46,7 @@ The `McpMarketPlace.jsx` component provides an app store-like interface for brow
 - Significantly reduces API calls and improves performance
 
 ### 4. **Unique Server Naming** ✨ NEW
+
 - **Format**: `{serverName}_{marketplaceItemId}` (e.g., `fetch_12345`)
 - Prevents conflicts when installing the same server type from different marketplace items
 - Consistent naming across install/uninstall/check operations
@@ -50,6 +55,7 @@ The `McpMarketPlace.jsx` component provides an app store-like interface for brow
   - `isServerFromMarketplaceItem(localServerName, marketplaceServerName, marketplaceItemId)`
 
 ### 5. **Installation Management**
+
 - **Install Button**: Adds MCP servers to your configuration
   - Fetches detailed server configuration by marketplace item ID
   - Handles multiple servers per marketplace item (e.g., "fetch" + "filesystem")
@@ -67,21 +73,24 @@ The `McpMarketPlace.jsx` component provides an app store-like interface for brow
   - Processing state managed per card, not globally
 
 ### 6. **Refresh Functionality**
+
 - Refresh button in the header with force bypass cache
 - Reloads both marketplace items and installed servers
 - Updates installed status for all marketplace items
 - Shows loading state during refresh
 
 ### 7. **Enhanced UI/UX** ✨ NEW
+
 - **Description Cleaning**: Automatically removes Markdown syntax, badge links, and extra markup
 - **Text Overflow**: Proper 3-line truncation with ellipsis
 - **Button Styling**: Red outlined button for uninstall, blue filled for install
-- **Empty States**: 
+- **Empty States**:
   - "No results found" with clear search button
   - "No marketplace items available" when empty
 - **Result Count**: Shows filtered vs total items when searching
 
 ### 8. **ModelScope Integration**
+
 - Fetches MCP servers from ModelScope's official marketplace API
 - Fetches detailed server configurations by ID for installation
 - Displays ModelScope logo in the header
@@ -94,7 +103,7 @@ The `McpMarketPlace.jsx` component provides an app store-like interface for brow
 ### Step 1: Import the Component
 
 ```jsx
-import McpMarketPlace from "./components/mcpManagement/McpMarketPlace";
+import McpMarketPlace from './components/mcpManagement/McpMarketPlace';
 ```
 
 ### Step 2: Add to Your Navigation
@@ -103,35 +112,37 @@ You can integrate the marketplace into your existing MCP Management system. Here
 
 ```jsx
 // In McpManagement.jsx or your main navigation
-import McpMarketPlace from "./McpMarketPlace";
+import McpMarketPlace from './McpMarketPlace';
 
-const [currentView, setCurrentView] = useState("servers"); // "servers" | "marketplace"
+const [currentView, setCurrentView] = useState('servers'); // "servers" | "marketplace"
 
 // Add a button to switch views
-<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-  <Button 
-    variant={currentView === "servers" ? "contained" : "outlined"}
-    onClick={() => setCurrentView("servers")}
+<Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+  <Button
+    variant={currentView === 'servers' ? 'contained' : 'outlined'}
+    onClick={() => setCurrentView('servers')}
   >
     My Servers
   </Button>
-  <Button 
-    variant={currentView === "marketplace" ? "contained" : "outlined"}
-    onClick={() => setCurrentView("marketplace")}
+  <Button
+    variant={currentView === 'marketplace' ? 'contained' : 'outlined'}
+    onClick={() => setCurrentView('marketplace')}
   >
     Marketplace
   </Button>
-</Box>
+</Box>;
 
 // Conditionally render the view
-{currentView === "marketplace" ? (
-  <McpMarketPlace />
-) : (
-  <>
-    <McpAgentTable />
-    <McpServerTable />
-  </>
-)}
+{
+  currentView === 'marketplace' ? (
+    <McpMarketPlace />
+  ) : (
+    <>
+      <McpAgentTable />
+      <McpServerTable />
+    </>
+  );
+}
 ```
 
 ### Step 3: Update Translation Files (Optional)
@@ -162,34 +173,41 @@ Add the following translation keys to your i18n files:
 The marketplace is already integrated with ModelScope's API through a Tauri backend command. The implementation includes:
 
 **Frontend (McpStore.jsx)**:
+
 ```jsx
-const getMarketplaceServers = async (pageNumber = 1, pageSize = 100, category = "", search = "") => {
+const getMarketplaceServers = async (
+  pageNumber = 1,
+  pageSize = 100,
+  category = '',
+  search = ''
+) => {
   try {
     set({ marketplaceLoading: true });
-    
-    const response = await invoke("fetch_modelscope_mcp_servers", {
+
+    const response = await invoke('fetch_modelscope_mcp_servers', {
       pageNumber: pageNumber,
       pageSize: pageSize,
       category: category,
-      search: search
+      search: search,
     });
-    
+
     const result = JSON.parse(response);
-    const transformedServers = result.data?.mcp_server_list?.map(server => ({
-      id: server.id,
-      name: server.locales?.en?.name || server.name,
-      chineseName: server.chinese_name || server.locales?.zh?.name,
-      description: server.locales?.en?.description || server.description,
-      keywords: [...(server.categories || []), ...(server.tags || [])],
-      icon: server.logo_url || "📦",
-      publisher: server.publisher,
-      viewCount: server.view_count,
-      categories: server.categories || [],
-    })) || [];
-    
+    const transformedServers =
+      result.data?.mcp_server_list?.map(server => ({
+        id: server.id,
+        name: server.locales?.en?.name || server.name,
+        chineseName: server.chinese_name || server.locales?.zh?.name,
+        description: server.locales?.en?.description || server.description,
+        keywords: [...(server.categories || []), ...(server.tags || [])],
+        icon: server.logo_url || '📦',
+        publisher: server.publisher,
+        viewCount: server.view_count,
+        categories: server.categories || [],
+      })) || [];
+
     set({ marketplaceServers: transformedServers });
   } catch (error) {
-    console.error("Failed to fetch MCP Marketplace Servers:", error);
+    console.error('Failed to fetch MCP Marketplace Servers:', error);
   } finally {
     set({ marketplaceLoading: false });
   }
@@ -197,6 +215,7 @@ const getMarketplaceServers = async (pageNumber = 1, pageSize = 100, category = 
 ```
 
 **Backend (lib.rs)**:
+
 ```rust
 #[tauri::command]
 async fn fetch_modelscope_mcp_servers(
@@ -206,7 +225,7 @@ async fn fetch_modelscope_mcp_servers(
     search: String
 ) -> Result<String, String> {
     let url = "https://www.modelscope.cn/openapi/v1/mcp/servers";
-    
+
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(30))
         .build()
@@ -216,12 +235,12 @@ async fn fetch_modelscope_mcp_servers(
         .put(url)
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
-        .header("User-Agent", "IntelAIA/2.2.0")
+        .header("User-Agent", "IntelAIA/2.7.0")
         .json(&request_body)
         .send()
         .await
         .map_err(|e| format!("Request failed: {}", e))?;
-    
+
     let text = response
         .text()
         .await
@@ -240,6 +259,7 @@ The component integrates with ModelScope's official MCP Server Marketplace API:
 **Endpoint**: `https://www.modelscope.cn/openapi/v1/mcp/servers`  
 **Method**: `PUT`  
 **Request Body**:
+
 ```json
 {
   "direction": 1,
@@ -254,6 +274,7 @@ The component integrates with ModelScope's official MCP Server Marketplace API:
 ```
 
 **Response Format**:
+
 ```typescript
 interface ModelScopeResponse {
   data: {
@@ -262,14 +283,14 @@ interface ModelScopeResponse {
       id: string;
       name: string;
       chinese_name: string;
-      description: string;  // May contain Markdown syntax
+      description: string; // May contain Markdown syntax
       locales: {
-        en: { name: string; description: string; };
-        zh: { name: string; description: string; };
+        en: { name: string; description: string };
+        zh: { name: string; description: string };
       };
       categories: string[];
       tags: string[];
-      keywords: string[];  // Used for search filtering
+      keywords: string[]; // Used for search filtering
       logo_url: string;
       publisher: string;
       view_count: number;
@@ -279,11 +300,13 @@ interface ModelScopeResponse {
 ```
 
 ### Server Detail API (By ID)
+
 For fetching individual server configuration during installation:
 
 **Endpoint**: `https://www.modelscope.cn/api/v1/mcp/servers/{server_id}`  
 **Method**: `GET`  
 **Response Format**:
+
 ```typescript
 interface ServerDetailResponse {
   Data: {
@@ -301,11 +324,13 @@ interface ServerDetailResponse {
 ```
 
 **Important Notes**:
+
 - The `mcpServers` field is an **object** (not array)
 - Keys are the actual MCP server names (e.g., "fetch", "sqlite")
 - When installed locally, servers are renamed to `{serverName}_{marketplaceItemId}` for uniqueness
 - Example: Server "fetch" from item "12345" becomes "fetch_12345"
-```
+
+````
 
 **Transformed Internal Format**:
 ```typescript
@@ -325,13 +350,14 @@ interface MarketplaceItem {
   url: string;                   // Server URL (populated on install)
   env: string;                   // Environment variables (populated on install)
 }
-```
+````
 
 ## Methods Used from McpStore
 
 The component uses the following methods from `useMcpStore`:
 
 ### Core Marketplace Methods
+
 - `getMarketplaceServers(forceRefresh = false)` - Fetch marketplace servers with 10-minute cache ✨ NEW
 - `getModelScopeMcpServerById(serverId)` - Fetch detailed server configuration by ID ✨ IMPROVED
 - `getLocalMcpServers()` - Fetch installed local servers (renamed from getMcpServer) ✨ RENAMED
@@ -341,6 +367,7 @@ The component uses the following methods from `useMcpStore`:
 - `setMarketplaceCacheTimeout(minutes)` - Configure cache timeout (default: 10 mins) ✨ NEW
 
 ### Server Management Methods
+
 - `addMcpServer()` - Install a new server
 - `removeMcpServer()` - Uninstall a server
 - `setMcpInput()` - Set server configuration
@@ -348,6 +375,7 @@ The component uses the following methods from `useMcpStore`:
 - `setSelectedMcpServerId()` - Set selected server ID
 
 ### State Variables
+
 - `marketplaceServers` - Array of marketplace items with `isInstalled` flag ✨ UPDATED
 - `marketplaceServersById` - Object cache indexed by marketplace ID ✨ NEW
 - `marketplaceLoading` - Loading state for API requests
@@ -417,12 +445,14 @@ The marketplace uses a Tauri backend command (`fetch_modelscope_mcp_servers`) in
 The marketplace implements intelligent caching to reduce API calls and improve performance:
 
 **Cache Behavior**:
+
 - Default cache timeout: **10 minutes** (configurable via `setMarketplaceCacheTimeout()`)
 - Cache stores both list data and individual server details
 - Automatic cache invalidation after timeout
 - Manual refresh available via "Refresh" button (`forceRefresh=true`)
 
 **Cache Structure**:
+
 ```javascript
 {
   marketplaceServers: [...],              // Array of marketplace items
@@ -435,6 +465,7 @@ The marketplace implements intelligent caching to reduce API calls and improve p
 ```
 
 **Cache Invalidation**:
+
 - Automatic after configured timeout
 - Manual via refresh button
 - On successful install/uninstall operations (updates installed status only)
@@ -446,12 +477,14 @@ To prevent conflicts when installing the same server from multiple marketplace i
 **Format**: `{serverName}_{marketplaceItemId}`
 
 **Example**:
+
 - Marketplace item "12345" contains server "fetch"
 - Installed name: `fetch_12345`
 - Another item "67890" also has "fetch"
 - Installed name: `fetch_67890`
 
 **Helper Method**:
+
 ```javascript
 generateMcpServerName(serverName, marketplaceItemId) {
   return `${serverName}_${marketplaceItemId}`;
@@ -459,6 +492,7 @@ generateMcpServerName(serverName, marketplaceItemId) {
 ```
 
 **Benefits**:
+
 - No naming conflicts between different marketplace items
 - Easy to trace which marketplace item a server came from
 - Enables multiple versions/variants of the same server
@@ -466,6 +500,7 @@ generateMcpServerName(serverName, marketplaceItemId) {
 ### Async Implementation
 
 The backend command is implemented as an async function to work within Tauri's async runtime:
+
 - Uses `reqwest::Client` (async version, NOT `reqwest::blocking::Client`)
 - This avoids runtime conflicts and crashes
 - Properly integrated with Tokio runtime used by Tauri
@@ -473,6 +508,7 @@ The backend command is implemented as an async function to work within Tauri's a
 ### Dependencies Required
 
 **Cargo.toml**:
+
 ```toml
 reqwest = { version = "0.11", features = ["json"] }
 serde_json = "1"
@@ -489,6 +525,7 @@ serde_json = "1"
 5. **Verify addMcpServer**: Ensure McpStore method receives correct config
 
 Example correct parsing:
+
 ```javascript
 Object.entries(serverInfo.mcpServers).forEach(([serverName, config]) => {
   const uniqueName = generateMcpServerName(serverName, serverId);
@@ -499,11 +536,13 @@ Object.entries(serverInfo.mcpServers).forEach(([serverName, config]) => {
 ### Can't Uninstall a Server
 
 **Common Issues**:
+
 - Servers cannot be uninstalled while running - **stop the server first**
 - Multiple servers from same marketplace item - all must be stopped before uninstall
 - Check console for "Server is currently running" message
 
 **Proper Uninstall Flow**:
+
 1. Stop all running servers associated with the marketplace item
 2. Click "Uninstall" button (should be red outlined)
 3. Confirm operation
@@ -535,6 +574,7 @@ Object.entries(serverInfo.mcpServers).forEach(([serverName, config]) => {
 ### Description Overflow or Markdown Visible
 
 If descriptions show Markdown syntax or overflow:
+
 1. **Check CSS**: Verify `.card-description` has `overflow: hidden` and `line-clamp: 3`
 2. **Verify Regex**: Description cleaning should remove `![...](...)` and `[...](...)` patterns
 3. **Update Component**: Ensure latest version with description cleaning logic
@@ -542,6 +582,7 @@ If descriptions show Markdown syntax or overflow:
 ### App Crashes on Marketplace Open
 
 If the app crashes with "Cannot drop a runtime in a context where blocking is not allowed":
+
 - Ensure using async `reqwest::Client` (not `blocking::Client`)
 - Verify function is declared as `async fn`
 - Check that `.await` is used after `.send()` and `.text()` calls
@@ -553,6 +594,7 @@ If the app crashes with "Cannot drop a runtime in a context where blocking is no
 You can test the ModelScope API using curl:
 
 **Windows PowerShell**:
+
 ```powershell
 curl https://www.modelscope.cn/openapi/v1/mcp/servers `
   --request PUT `
@@ -561,6 +603,7 @@ curl https://www.modelscope.cn/openapi/v1/mcp/servers `
 ```
 
 **Windows Batch**:
+
 ```batch
 curl https://www.modelscope.cn/openapi/v1/mcp/servers ^
   --request PUT ^
@@ -573,9 +616,7 @@ curl https://www.modelscope.cn/openapi/v1/mcp/servers ^
 1. **Installation Details**: Server command/args/url are not provided by ModelScope API
    - These fields need to be populated during installation
    - User may need to configure these manually
-   
 2. **No Version Information**: Current API doesn't provide version info
-   
 3. **Limited Metadata**: Some fields like dependencies, requirements not available
 
 ## Future Enhancements
@@ -592,10 +633,13 @@ Potential improvements:
 8. **Batch Operations**: Install/uninstall multiple servers at once
 9. **Export/Import**: Share server configurations between users
 10. **Update Notifications**: Notify when installed servers have updates available
+
 ## Version History
 
 ### v2.3.0 (Latest) ✨ NEW
+
 **Enhanced User Experience & Performance**
+
 - ✅ **Smart Search**: Real-time search across name, description, publisher, and keywords (600px width)
 - ✅ **Intelligent Caching**: 10-minute configurable cache to reduce API calls
 - ✅ **Unique Server Naming**: Format `{serverName}_{marketplaceItemId}` prevents conflicts
@@ -607,14 +651,18 @@ Potential improvements:
 - ✅ **Function Renaming**: Renamed `getMcpServer()` → `getLocalMcpServers()`
 
 ### v2.2.0
+
 **Bug Fixes & Stability**
+
 - Fixed JSON parsing with `Object.entries()` for `mcpServers` object structure
 - Fixed ReferenceError: "servers is not defined" → "serverinfo"
 - Added comprehensive console logging for debugging
 - Fixed button styling issues
 
 ### v2.1.0
+
 **Initial ModelScope Integration**
+
 - Added backend Tauri command for API access
 - Implemented pagination support
 - Added ModelScope logo and branding

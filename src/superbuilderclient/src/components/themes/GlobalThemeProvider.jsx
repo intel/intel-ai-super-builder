@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import useDataStore from "../../stores/DataStore";
 
 // wrapper to apply consistent global assistant themes across different webview windows
-const GlobalThemeProvider = ({ 
-    children, 
-    isSubWindow=true,
+const GlobalThemeProvider = ({
+    children,
+    isSubWindow = true,
 }) => {
     const { assistant } = useDataStore();
     const { i18n } = useTranslation();
@@ -26,7 +26,7 @@ const GlobalThemeProvider = ({
     }, []);
 
     const windowLabel = getCurrentWindow().label;
-    
+
     // Load fonts dynamically based on locale
     useEffect(() => {
         const loadFontsForLocale = async () => {
@@ -41,17 +41,17 @@ const GlobalThemeProvider = ({
                 }
             }
         };
-        
+
         loadFontsForLocale();
     }, [i18n.language]);
-    
+
     useEffect(() => {
         // only start listening on component mount
         const unlistenPromise = listen('assistant-config-updated', async () => {
             // force sub-windows to get recent config to update the appearance
             if (isSubWindow) {
                 console.log(`Fetching latest config for subwindow: ${windowLabel}`);
-                await useDataStore.getState().getDBConfig(); 
+                await useDataStore.getState().getDBConfig();
             }
         });
         return () => {
@@ -92,35 +92,34 @@ const GlobalThemeProvider = ({
         },
     });
 
+    //apply css variables to <html> so portals can access
+    useEffect(() => {
+        const root = document.documentElement;
+        root.style.setProperty("--primary-main-color", globalTheme.palette.primary.main);
+        root.style.setProperty("--primary-light-color", globalTheme.palette.primary.light);
+        root.style.setProperty("--primary-dark-color", globalTheme.palette.primary.dark);
+        root.style.setProperty("--primary-text-color", globalTheme.palette.primary.contrastText);
+        root.style.setProperty("--secondary-main-color", globalTheme.palette.secondary.main);
+        root.style.setProperty("--secondary-light-color", globalTheme.palette.secondary.light);
+        root.style.setProperty("--secondary-dark-color", globalTheme.palette.secondary.dark);
+        root.style.setProperty("--secondary-text-color", globalTheme.palette.secondary.contrastText);
+        root.style.setProperty("--error-main-color", globalTheme.palette.error.main);
+        root.style.setProperty("--bg-color", globalTheme.palette.background.default);
+        root.style.setProperty("--bg-secondary-color", globalTheme.palette.background.paper);
+        root.style.setProperty("--divider-color", globalTheme.palette.divider);
+        root.style.setProperty("--text-primary-color", globalTheme.palette.text.primary);
+        root.style.setProperty("--text-secondary-color", globalTheme.palette.text.secondary);
+        root.style.setProperty("--button-active-color", globalTheme.palette.action.active);
+        root.style.setProperty("--button-hover-color", globalTheme.palette.action.hover);
+        root.style.setProperty("--button-selected-color", globalTheme.palette.action.selected);
+        root.style.setProperty("--button-disabled-color", globalTheme.palette.action.disabled);
+        root.style.setProperty("--locale-font-family", getFontFamily(i18n.language));
+    }, [globalTheme, i18n.language]);
+
     return (
-        <span
-            // global variables for non-mui components to access global theme colors from
-            style={{
-                "--primary-main-color": globalTheme.palette.primary.main,
-                "--primary-light-color": globalTheme.palette.primary.light,
-                "--primary-dark-color": globalTheme.palette.primary.dark,
-                "--primary-text-color": globalTheme.palette.primary.contrastText,
-                "--secondary-main-color": globalTheme.palette.secondary.main,
-                "--secondary-light-color": globalTheme.palette.secondary.light,
-                "--secondary-dark-color": globalTheme.palette.secondary.dark,
-                "--secondary-text-color": globalTheme.palette.secondary.contrastText,     
-                "--error-main-color": globalTheme.palette.error.main,
-                "--bg-color": globalTheme.palette.background.default,
-                "--divider-color": globalTheme.palette.divider,
-                "--text-primary-color": globalTheme.palette.text.primary,
-                "--text-secondary-color": globalTheme.palette.text.secondary,
-                "--button-active-color": globalTheme.palette.action.active,
-                "--button-hover-color": globalTheme.palette.action.hover,
-                "--button-selected-color": globalTheme.palette.action.selected,
-                "--button-disabled-color": globalTheme.palette.action.disabled,
-                "--locale-font-family": getFontFamily(i18n.language),
-            }}
-        >
-            <ThemeProvider theme={globalTheme}>
-                {children}
-            </ThemeProvider>
-        </span>
-        
+        <ThemeProvider theme={globalTheme}>
+            {children}
+        </ThemeProvider>
     );
 };
 

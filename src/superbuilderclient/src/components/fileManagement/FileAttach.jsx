@@ -85,6 +85,7 @@ const FileAttach = ({validExtensions, fileLimit=-1, onFilesSelected, disable=fal
                     variant="contained"
                     onClick={() => selectFile()}
                     disabled={selectingFiles || disable}
+                    data-testid="file-attach-button"
                 >
                     Attach Files
                 </Button>

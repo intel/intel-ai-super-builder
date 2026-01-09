@@ -1,4 +1,4 @@
-﻿import React, { useContext } from "react";
+import React, { useContext } from "react";
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
 

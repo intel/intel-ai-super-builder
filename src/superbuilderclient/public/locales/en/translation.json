@@ -5,8 +5,8 @@
     "part_2": "Please check the minimum hardware requirements:",
     "part_3": "CPU: Intel® Core™ Ultra processor Series 1 (former Meteor Lake)",
     "part_4": "Memory (RAM): 16GB",
-    "part_5": "Storage: 4GB for AI Assistant with 1 LLM",
-    "part_6": "GPU: Integrated Intel® Graphics with driver version 30.0.100.9955 or later",
+    "part_5": "Storage: 4GB for AI Super Builder with 1 LLM",
+    "part_6": "GPU: Integrated Intel® Graphics with driver version 32.0.101.8132 or later",
     "part_7": "Network: Broadband connection for LLMs and other components’ download",
     "model_download_status": "Model Downloading Status"
   },
@@ -14,6 +14,11 @@
     "title": "Warning: Your Hardware Has Not Been Validated",
     "part_1": "Your system has not been validated by the SuperBuilder team.  ",
     "part_2": "While you can proceed and use this software, please be aware that we cannot guarantee optimal performance."
+  },
+  "active_file_tooltip": {
+    "part_1": "Add only relevant files to your AI agent.",
+    "part_2": "They provide the right context, so answers are more accurate and on‑topic, with fewer irrelevant results.",
+    "part_3": "Tip: choose files that directly match your question."
   },
   "draganddrop": {
     "button": {
@@ -23,10 +28,10 @@
       "manage_mcp": "Manage MCP Server"
     },
     "title": "Knowledge Base",
-    "subtitle": "\n• Add files to the Knowledge Base to make your assistant smarter. For specialized queries, attach them directly to the query.\n",
+    "subtitle": "\n• Add files to the Knowledge Base to make your agent smarter. For specialized queries, attach them directly to the query.\n",
     "area": "Drag and drop files here",
     "file_manage": {
-      "back": "Back to your assistant",
+      "back": "Back to your agent",
       "add": "Add files to knowledge base",
       "cancel": "Cancel",
       "remove": "Remove from knowledge base",
@@ -47,6 +52,7 @@
   "mcp": {
     "ui": {
       "back": "Back to Super Agent",
+      "mcp_marketplace": "MCP Marketplace",
       "add": "Add MCP Server",
       "edit": "Edit MCP server info",
       "remove": "Remove MCP Server",
@@ -80,7 +86,33 @@
       "mcp_agent_mcp_server_note": "Note: At least one MCP Server is required to start the agent",
       "confirm_remove": "Confirm Remove",
       "confirm_remove_message": "Please confirm to remove the selected",
-      "remove_button": "Remove"
+      "remove_button": "Remove",
+      "docker_recommendation_title": "Recommended:",
+      "docker_recommendation_description": "For better security and isolation, consider using the Command method with Docker to add MCP servers (Requires Docker Desktop).",
+      "docker_recommendation_visit": "Visit",
+      "docker_servers_link": "Docker MCP Hub",
+      "docker_recommendation_suffix": "Note: Docker Desktop must be installed on your system."
+    },
+    "tools_dialog": {
+      "title": "MCP Server Tools",
+      "confirm_title": "Review and Approve MCP Server Tools",
+      "confirm_title_multi": "Review Agent Tools",
+      "consent_alert_title": "MCP Agent Requires Tool Approval",
+      "consent_message": "MCP Agent \"{{agentName}}\" requires these tools to function. Please review and approve.",
+      "consent_message_multi": "This agent depends on the following MCP servers and tools to operate. Please review them carefully and ensure they are safe and come from a trusted source.",
+      "loading": "Fetching tools...",
+      "no_tools": "No tools available",
+      "no_description": "No description available",
+      "available_tools": "Available Tools",
+      "server_name": "MCP Server Name",
+      "command": "Command",
+      "url": "URL",
+      "environment": "Environment Variables",
+      "parameters": "Parameters",
+      "close": "Close",
+      "confirm": "Approve & Continue",
+      "reject": "Reject & Stop Agent",
+      "server_indicator": "MCP Server {{current}} of {{total}}"
     },
     "server_table": {
       "command_title": "MCP Server with Command",
@@ -103,7 +135,29 @@
       "system_prompt": "System Prompt",
       "mcp_server": "MCP Server",
       "actions": "Actions",
-      "remove": "Remove"
+      "remove": "Remove",
+      "no_mcpserver": "No MCP Server Selected"
+    },
+    "marketplace": {
+      "title": "MCP Marketplace",
+      "refresh": "Refresh Marketplace",
+      "loading": "Loading marketplace items...",
+      "add": "Add to MCP Manager",
+      "add_docker": "Add Docker Image",
+      "remove": "Remove",
+      "adding": "Adding...",
+      "removing": "Removing...",
+      "added": "Added",
+      "running": "Running",
+      "empty": "No marketplace items available",
+      "search": "Search by name, publisher, keywords...",
+      "showing_results": "Showing results",
+      "no_results": "No results found",
+      "clear_search": "Clear search",
+      "close": "Close",
+      "by": "by",
+      "views": "views",
+      "no_description": "No description available"
     }
   },
   "chat": {
@@ -113,6 +167,8 @@
     "placeholder": "Enter your question here",
     "placeholder_generate_image": "Generate an image",
     "processing": "Processing...",
+    "thinking": "Thinking",
+    "thought": "Thought",
     "disclaimer_part_1": "Disclaimer: You are interacting with a Chatbot. ",
     "disclaimer_part_2": " can make mistakes. Check important information.",
     "imageinfo": "If image-related tasks are complete, please switch back to a text LLM for standard queries to get better response.",
@@ -139,17 +195,18 @@
       "notice": "If image-related tasks are complete, please switch back to a text LLM for standard queries to get better response.",
       "welcome": "Welcome,",
       "subwelcome": "How can I help you today?",
-      "current_model": "Current Model:"
+      "current_model": "Current Model:",
+      "workflow_placeholder": "Ask anything - Your agent may make mistakes. Please check important info."
     }
   },
   "topbar": {
     "title": "About ",
-    "content_part_1": "This assistant is based on the Intel ® Assistant. Builder framework. The assistant has been optimized to use the AI PC capabilities of the hardware in this computer. Visit",
+    "content_part_1": "This application is based on the Intel® AI Super Builder framework. The application has been optimized to use the AI PC capabilities of the hardware in this computer. Visit",
     "content_part_2": "Intel.com/AIPC",
     "content_part_3": "for the latest AI PC information and product availability.",
-    "content_part_4": "Assistant Builder Application Package:",
+    "content_part_4": "AI Super Builder Application Package:",
     "content_part_4_1": "Visit the",
-    "content_part_5": "Intel® AI Assistant Builder Website",
+    "content_part_5": "Intel® AI Super Builder Website",
     "content_part_6": "Chat Model:",
     "content_part_7": "Embedding Model:",
     "content_part_8": "Reranker Model:",
@@ -171,7 +228,7 @@
   "model_downloader": {
     "head": {
       "part_1": "One time setup",
-      "part_2": "Getting required files and loading AI assistant model"
+      "part_2": "Getting required files and loading model"
     },
     "body": {
       "consent_message": "The models listed below are required. Please view the model card(s) for the respective terms and conditions and click \"Proceed\" to continue.",
@@ -190,7 +247,7 @@
     }
   },
   "email": {
-    "title_1": "Email Assistant",
+    "title_1": "Email Helper",
     "title_2": "Your email draft. Feel free to edit.",
     "subject": "Subject:",
     "message": "Message:",
@@ -203,7 +260,7 @@
     "fluid_modal": "Build your own model for SuperBuilder",
     "appearance": {
       "title": "Appearance",
-      "description": "Configure the name, look, and feel of your assistant"
+      "description": "Configure the name, look, and feel of your agent"
     },
     "name": "Name",
     "visuals": {
@@ -296,7 +353,7 @@
     },
     "parameters": {
       "title": "Parameters",
-      "description": "Modify how the assistant behaves (advanced users only)",
+      "description": "Modify how the agent behaves (advanced users only)",
       "reset_button": "Reset to Defaults",
       "llm": {
         "title": "LLM",
@@ -334,7 +391,7 @@
       "steps": {
         "title": "Here are the steps that we follow to prepare the models:",
         "step1": "First, you need to install the HuggingFace's Optimum package with the OpenVINO support:",
-        "step2": "The current framework requires transformers version 4.40.1:",
+        "step2": "The current framework requires transformers version 4.53.0:",
         "step3": "Then, use the following command to download and quantize the model using an int4 symmetric format:",
         "step3_note": "where <1><MODEL_ID></1> corresponds to the HuggingFace's model id and <1><OUTPUT></1> is the path where the generated OV model will be stored.",
         "step4": "For LLMs, we can use <1>--task text-generation-with-past</1>, and will need <1>group_size</1>, <1>sym</1> and <1>ratio</1> etc parameters 😊",
@@ -370,7 +427,7 @@
     "header": "Check for Update",
     "fetch_update": "Fetching the update...",
     "failed_to_fetch_update": "Fail to fetch update.",
-    "title": "Intel(R) AI Assistant Builder",
+    "title": "Intel(R) AI Super Builder",
     "update_available": "An update is available",
     "update_to_date": "Your application is up to date",
     "install_version": "Installed Version:",
