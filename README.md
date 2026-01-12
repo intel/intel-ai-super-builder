@@ -28,9 +28,6 @@ These assistants streamline everyday tasks and deliver intelligent solutions by 
       - [Version 2.0.0 ⬇️ Download](#version-200-️-download)
 - [Get Support](#get-support)
 
-
-<br>
-
 ## Why Choose Intel® AI Super Builder?
 - **Simple & Accelerated Development**: Jumpstart local AI inferencing with a rich set of prebuilt **APIs**, reusable **templates**, and a user-friendly tooling environment designed for fast prototyping and deployment.
 - **Flexible & Modular Architecture**: Use our turnkey front-end reference design for immediate rollout or integrate only the backend components you need to build a fully customized experience.
@@ -79,7 +76,7 @@ These assistants streamline everyday tasks and deliver intelligent solutions by 
 ![webportal](media/webportal_border.png)
 
 - ### Start Using
-Please refer to the [user guide](https://aibuilder.intel.com/Intel%20AI%20Assistant%20Builder%20User%20Guide.pdf) for detailed instructions. See the "Getting Started" section to learn basic usage and the "Special Query Types" section to learn about special workflows.
+Please refer to the [user guide](https://aibuilder.intel.com/Intel%20AI%20Super%20Builder%20User%20Guide.pdf) for detailed instructions. See the "Getting Started" section to learn basic usage and the "Special Query Types" section to learn about special workflows.
 
 <br>
 
@@ -98,9 +95,9 @@ To get started with the UI source code, refer to the [UI development guide](src/
 ### API Documentation
   Find the API documentation in the following links:
 
-  [API Documentation - Latest](https://intel.github.io/intel-ai-assistant-builder/v2.0.0)
+  [API Documentation - Latest](https://intel.github.io/intel-ai-super-builder/v2.0.0)
 
-  [API Documentation - v1.2.0](https://intel.github.io/intel-ai-assistant-builder/v1.2.0)
+  [API Documentation - v1.2.0](https://intel.github.io/intel-ai-super-builder/v1.2.0)
 
 <br>
 
@@ -122,8 +119,7 @@ To get started with the UI source code, refer to the [UI development guide](src/
 | bge-base-en-v1.5-int8-ov                       | bge-base-en-v1.5-GGUF                        |
 | bge-reranker-base-int8-ov                      | bge-reranker-base-GGUF-Q8_0                  |
 
-
-For **Intel AI Super Builder – OpenVINO**, you may also **upload your own model** or **convert models from Hugging Face directly** using the provided "Model Upload" or "Model Conversion" capabilities. Please consult the [user guide](https://aibuilder.intel.com/Intel%20AI%20Assistant%20Builder%20User%20Guide.pdf) for full details on these features.
+For **Intel AI Super Builder – OpenVINO**, you may also **upload your own model** or **convert models from Hugging Face directly** using the provided "Model Upload" or "Model Conversion" capabilities. Please consult the [user guide](https://aibuilder.intel.com/Intel%20AI%20Super%20Builder%20User%20Guide.pdf) for full details on these features.
 
  ![Model Tools](media/models_action_border.png)
 
@@ -156,7 +152,7 @@ For **Intel AI Super Builder – OpenVINO**, you may also **upload your own mode
 <br>
 
 ## Help and Troubleshooting
-For comprehensive troubleshooting guidance, installation tips, and a complete list of known issues, please refer to the **"Troubleshooting and Known Issues"** section in the [user guide](https://aibuilder.intel.com/Intel%20AI%20Assistant%20Builder%20User%20Guide.pdf).
+For comprehensive troubleshooting guidance, installation tips, and a complete list of known issues, please refer to the **"Troubleshooting and Known Issues"** section in the [user guide](https://aibuilder.intel.com/Intel%20AI%20Super%20Builder%20User%20Guide.pdf).
 
 <br>
 
@@ -199,7 +195,7 @@ Overflow token and stop-chat handling fixes have been added to address out-of-me
 This release addresses a wide range of issues, including CSV encoding errors, security vulnerabilities and regressions caused by dependency upgrades. These fixes collectively improve reliability and user experience across the platform.
 
 ## Get Support
-For technical questions and feature requests, please use GitHub [Issues](https://github.com/intel/intel-ai-assistant-builder/issues).
+For technical questions and feature requests, please use GitHub [Issues](https://github.com/intel/intel-ai-super-builder/issues).
 
 We would love to hear about your experience. Please contact us at [&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#046;&#097;&#105;&#098;&#117;&#105;&#108;&#100;&#101;&#114;&#064;&#105;&#110;&#116;&#101;&#108;&#046;&#099;&#111;&#109;](mailto:support.aibuilder@intel.com).
 
