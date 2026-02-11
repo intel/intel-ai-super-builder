@@ -162,7 +162,7 @@ else
         {
             Console.WriteLine("Response chunk: " + response.Message);
             ragFullResponse += response.Message;
-        
+
             // Print references if available
             if (response.References.Count > 0)
             {
@@ -344,4 +344,20 @@ finally
 {
     Console.WriteLine($"Full response: {fullChatResponse}");
 }
+
+
+// SEMANTIC ROUTING EXAMPLE
+// Please comment out the RAG and MCP sections above if you only want to run this section   
+Console.WriteLine("\n\n-------- Semantic Routing Example -------");
+try
+{
+    await SemanticRoutingExampleRunner.RunAsync();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Semantic routing example error: {ex.Message}");
+    Console.WriteLine("Make sure the embedding service is running on http://localhost:8101");
+}
+
+
 Console.WriteLine("\n=== Done ===");
